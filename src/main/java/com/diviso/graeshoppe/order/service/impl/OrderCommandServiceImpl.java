@@ -274,7 +274,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 	
 	@Override
 	public boolean publishMesssage(String orderId) {
-		Order order = orderRepository.findByOrderIdAndStatus_Name(orderId, "payment-processed-unapproved").get();
+	Order order = orderRepository.findByOrderIdAndStatus_Name(orderId, "payment-processed-unapproved").get();
 		
 	Customer customer = customerResourceApi.findByReferenceUsingGET(order.getCustomerId()).getBody();
 	Long phone = customer.getContact().getMobileNumber();

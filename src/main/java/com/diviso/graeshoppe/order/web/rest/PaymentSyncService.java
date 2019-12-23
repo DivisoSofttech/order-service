@@ -29,7 +29,6 @@ public class PaymentSyncService {
 	@Autowired
 	private OrderCommandService orderService;
 	
-
 	@StreamListener(SinkConfiguration.PAYMENT)
 	public void listenToPayment(KStream<String, Payment> message) {
 		message.foreach((key,value) -> {
@@ -42,9 +41,6 @@ public class PaymentSyncService {
 				orderDTO.get().setStatusId(6l); //payment-processed-unapproved
 				orderService.update(orderDTO.get());
 				LOG.info("Order updated with payment ref");
-				
-				// orderService.publishMesssage(orderDTO.get().getOrderId(),orderDTO.get().getCustomerId()); // sending order to MOM
-
 			}
 			
 		});

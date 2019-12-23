@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -50,6 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = OrderApp.class)
+@AutoConfigureMockMvc
 public class NotificationResourceIntTest {
 
     private static final String DEFAULT_TITLE = "AAAAAAAAAA";
@@ -111,11 +113,15 @@ public class NotificationResourceIntTest {
     private Validator validator;
 
     private MockMvc restNotificationMockMvc;
+    
+    @Autowired
+    private MockMvc mockmvcTest;
 
     private Notification notification;
 
     @Before
     public void setup() {
+    	System.out.println("Mockmvc test ***************************************"+mockmvcTest);
         MockitoAnnotations.initMocks(this);
         final NotificationResource notificationResource = new NotificationResource(notificationService);
         this.restNotificationMockMvc = MockMvcBuilders.standaloneSetup(notificationResource)
