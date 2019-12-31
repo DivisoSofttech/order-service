@@ -111,17 +111,17 @@ spring:
             hibernate.cache.hazelcast.use_lite_member: true
     data:
         elasticsearch:
-           cluster-name: 20a60de2fab94b1b9aca60bcfee1591b
-           cluster-nodes: https://20a60de2fab94b1b9aca60bcfee1591b.us-central1.gcp.cloud.es.io:9243  
+           cluster-name: 9a8bffb7a852435185aabd4670a7c19e
+           cluster-nodes: https://9a8bffb7a852435185aabd4670a7c19e.us-central1.gcp.cloud.es.io:9243/  
            properties:
                path:
                    logs: target/elasticsearch/log
                    data: target/elasticsearch/data
         jest:
            username: elastic
-           password: 7hcaOIiz0JiemFumZFRsLz6E
+           password: zWmOqUXEJMFKJ66Zyn3erGt2
            readTimeout: 10000
-           uri: https://20a60de2fab94b1b9aca60bcfee1591b.us-central1.gcp.cloud.es.io:9243    
+           uri: https://9a8bffb7a852435185aabd4670a7c19e.us-central1.gcp.cloud.es.io:9243    
     liquibase:
         contexts: dev
     mail:
