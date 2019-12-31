@@ -6,7 +6,7 @@ import com.diviso.graeshoppe.order.service.dto.UniqueOrderIDDTO;
 import org.mapstruct.*;
 
 /**
- * Mapper for the entity UniqueOrderID and its DTO UniqueOrderIDDTO.
+ * Mapper for the entity {@link UniqueOrderID} and its DTO {@link UniqueOrderIDDTO}.
  */
 @Mapper(componentModel = "spring", uses = {})
 public interface UniqueOrderIDMapper extends EntityMapper<UniqueOrderIDDTO, UniqueOrderID> {

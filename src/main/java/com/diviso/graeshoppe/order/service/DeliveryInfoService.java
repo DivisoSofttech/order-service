@@ -1,6 +1,5 @@
 package com.diviso.graeshoppe.order.service;
 
-import com.diviso.graeshoppe.order.domain.DeliveryInfo;
 import com.diviso.graeshoppe.order.resource.assembler.CommandResource;
 import com.diviso.graeshoppe.order.service.dto.DeliveryInfoDTO;
 import org.springframework.data.domain.Page;

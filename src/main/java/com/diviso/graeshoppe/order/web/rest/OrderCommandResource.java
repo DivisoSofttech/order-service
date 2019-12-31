@@ -2,26 +2,24 @@ package com.diviso.graeshoppe.order.web.rest;
 import com.diviso.graeshoppe.order.resource.assembler.CommandResource;
 import com.diviso.graeshoppe.order.service.OrderCommandService;
 import com.diviso.graeshoppe.order.web.rest.errors.BadRequestAlertException;
-import com.diviso.graeshoppe.order.web.rest.util.HeaderUtil;
-import com.diviso.graeshoppe.order.web.rest.util.PaginationUtil;
+import io.github.jhipster.web.util.HeaderUtil;
+import io.github.jhipster.web.util.PaginationUtil;
 import com.diviso.graeshoppe.order.service.dto.OrderDTO;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * REST controller for managing Order.
@@ -30,9 +28,7 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("/api")
 public class OrderCommandResource {
 
-	@Autowired
-	private  SimpMessagingTemplate template;
-	
+
 
     private final Logger log = LoggerFactory.getLogger(OrderCommandResource.class);
 
@@ -40,13 +36,9 @@ public class OrderCommandResource {
 
     private final OrderCommandService orderService;
     
-    @GetMapping("/send")
-    public void send(Principal principal) {
-    	log.info("User is #################################### "+principal.getName());
-    	template.convertAndSendToUser(principal.getName(), "/queue/notification", "Message from "+principal.getName());
-   
-    	
-    }
+    @Value("${jhipster.clientApp.name}")
+    private String applicationName;
+
 
     public OrderCommandResource(OrderCommandService orderService) {
         this.orderService = orderService;
@@ -68,7 +60,7 @@ public class OrderCommandResource {
         }
         CommandResource result = orderService.save(orderDTO);
         return ResponseEntity.created(new URI("/api/orders/" + result.getNextTaskId()))
-            .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getNextTaskId().toString()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true,ENTITY_NAME, result.getNextTaskId().toString()))
             .body(result);
     }
 
@@ -89,7 +81,7 @@ public class OrderCommandResource {
         }
         OrderDTO result = orderService.update(orderDTO);
         return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, orderDTO.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName,true,ENTITY_NAME, orderDTO.getId().toString()))
             .body(result);
     }
 
@@ -103,7 +95,7 @@ public class OrderCommandResource {
     public ResponseEntity<List<OrderDTO>> getAllOrders(Pageable pageable) {
         log.debug("REST request to get a page of Orders");
         Page<OrderDTO> page = orderService.findAll(pageable);
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/orders");
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(),page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
@@ -130,7 +122,7 @@ public class OrderCommandResource {
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
         log.debug("REST request to delete Order : {}", id);
         orderService.delete(id);
-        return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+        return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(applicationName,true,ENTITY_NAME, id.toString())).build();
     }
 
     /**
@@ -145,7 +137,7 @@ public class OrderCommandResource {
     public ResponseEntity<List<OrderDTO>> searchOrders(@RequestParam String query, Pageable pageable) {
         log.debug("REST request to search for a page of Orders for query {}", query);
         Page<OrderDTO> page = orderService.search(query, pageable);
-        HttpHeaders headers = PaginationUtil.generateSearchPaginationHttpHeaders(query, page, "/api/_search/orders");
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 

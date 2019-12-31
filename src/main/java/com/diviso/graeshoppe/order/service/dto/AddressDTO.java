@@ -3,7 +3,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * A DTO for the Address entity.
+ * A DTO for the {@link com.diviso.graeshoppe.order.domain.Address} entity.
  */
 public class AddressDTO implements Serializable {
 

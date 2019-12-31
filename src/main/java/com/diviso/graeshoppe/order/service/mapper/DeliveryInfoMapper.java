@@ -6,7 +6,7 @@ import com.diviso.graeshoppe.order.service.dto.DeliveryInfoDTO;
 import org.mapstruct.*;
 
 /**
- * Mapper for the entity DeliveryInfo and its DTO DeliveryInfoDTO.
+ * Mapper for the entity {@link DeliveryInfo} and its DTO {@link DeliveryInfoDTO}.
  */
 @Mapper(componentModel = "spring", uses = {AddressMapper.class})
 public interface DeliveryInfoMapper extends EntityMapper<DeliveryInfoDTO, DeliveryInfo> {

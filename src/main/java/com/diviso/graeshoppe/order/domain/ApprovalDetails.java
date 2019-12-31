@@ -1,15 +1,12 @@
 package com.diviso.graeshoppe.order.domain;
-
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 
-import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.Objects;
 
 /**
  * A ApprovalDetails.
@@ -17,13 +14,14 @@ import java.util.Objects;
 @Entity
 @Table(name = "approval_details")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-@Document(indexName = "approvaldetails")
+@org.springframework.data.elasticsearch.annotations.Document(indexName = "approvaldetails")
 public class ApprovalDetails implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @org.springframework.data.elasticsearch.annotations.Field(type = FieldType.Keyword)
     private Long id;
 
     @Column(name = "accepted_at")
@@ -89,19 +87,15 @@ public class ApprovalDetails implements Serializable {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ApprovalDetails)) {
             return false;
         }
-        ApprovalDetails approvalDetails = (ApprovalDetails) o;
-        if (approvalDetails.getId() == null || getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), approvalDetails.getId());
+        return id != null && id.equals(((ApprovalDetails) o).id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return 31;
     }
 
     @Override

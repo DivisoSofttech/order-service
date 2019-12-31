@@ -14,19 +14,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Service class for managing users.
@@ -55,11 +52,11 @@ public class UserService {
     /**
      * Update basic information (first name, last name, email, language) for the current user.
      *
-     * @param firstName first name of user
-     * @param lastName last name of user
-     * @param email email id of user
-     * @param langKey language key
-     * @param imageUrl image URL of user
+     * @param firstName first name of user.
+     * @param lastName  last name of user.
+     * @param email     email id of user.
+     * @param langKey   language key.
+     * @param imageUrl  image URL of user.
      */
     public void updateUser(String firstName, String lastName, String email, String langKey, String imageUrl) {
         SecurityUtils.getCurrentUserLogin()
@@ -67,7 +64,9 @@ public class UserService {
             .ifPresent(user -> {
                 user.setFirstName(firstName);
                 user.setLastName(lastName);
-                user.setEmail(email.toLowerCase());
+                if (email != null) {
+	                user.setEmail(email.toLowerCase());
+                }
                 user.setLangKey(langKey);
                 user.setImageUrl(imageUrl);
                 userSearchRepository.save(user);
@@ -79,8 +78,8 @@ public class UserService {
     /**
      * Update all information for a specific user, and return the modified user.
      *
-     * @param userDTO user to update
-     * @return updated user
+     * @param userDTO user to update.
+     * @return updated user.
      */
     public Optional<UserDTO> updateUser(UserDTO userDTO) {
         return Optional.of(userRepository
@@ -92,7 +91,9 @@ public class UserService {
                 user.setLogin(userDTO.getLogin().toLowerCase());
                 user.setFirstName(userDTO.getFirstName());
                 user.setLastName(userDTO.getLastName());
-                user.setEmail(userDTO.getEmail().toLowerCase());
+                if (userDTO.getEmail() != null) {
+                    user.setEmail(userDTO.getEmail().toLowerCase());
+                }
                 user.setImageUrl(userDTO.getImageUrl());
                 user.setActivated(userDTO.isActivated());
                 user.setLangKey(userDTO.getLangKey());
@@ -141,39 +142,11 @@ public class UserService {
     }
 
     /**
-     * @return a list of all the authorities
+     * Gets a list of all the authorities.
+     * @return a list of all the authorities.
      */
     public List<String> getAuthorities() {
         return authorityRepository.findAll().stream().map(Authority::getName).collect(Collectors.toList());
-    }
-
-    /**
-     * Returns the user for a OAuth2 authentication.
-     * Synchronizes the user in the local repository
-     *
-     * @param authentication OAuth2 authentication
-     * @return the user from the authentication
-     */
-    @SuppressWarnings("unchecked")
-    public UserDTO getUserFromAuthentication(OAuth2Authentication authentication) {
-        Object oauth2AuthenticationDetails = authentication.getDetails(); // should be an OAuth2AuthenticationDetails
-        Map<String, Object> details = (Map<String, Object>) authentication.getUserAuthentication().getDetails();
-        User user = getUser(details);
-        Set<Authority> userAuthorities = extractAuthorities(authentication, details);
-        user.setAuthorities(userAuthorities);
-
-        // convert Authorities to GrantedAuthorities
-        Set<GrantedAuthority> grantedAuthorities = userAuthorities.stream()
-            .map(Authority::getName)
-            .map(SimpleGrantedAuthority::new)
-            .collect(Collectors.toSet());
-
-        UsernamePasswordAuthenticationToken token = getToken(details, user, grantedAuthorities);
-        authentication = new OAuth2Authentication(authentication.getOAuth2Request(), token);
-        authentication.setDetails(oauth2AuthenticationDetails); // must be present in a gateway for TokenRelayFilter to work
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        return new UserDTO(syncUserWithIdP(details, user));
     }
 
     private User syncUserWithIdP(Map<String, Object> details, User user) {
@@ -184,9 +157,9 @@ public class UserService {
         for (String authority : userAuthorities) {
             if (!dbAuthorities.contains(authority)) {
                 log.debug("Saving authority '{}' in local database", authority);
-                Authority authoritytoSave = new Authority();
-                authoritytoSave.setName(authority);
-                authorityRepository.save(authoritytoSave);
+                Authority authorityToSave = new Authority();
+                authorityToSave.setName(authority);
+                authorityRepository.save(authorityToSave);
             }
         }
         // save account in to sync users between IdP and JHipster's local database
@@ -215,42 +188,46 @@ public class UserService {
         return user;
     }
 
-    private static UsernamePasswordAuthenticationToken getToken(Map<String, Object> details, User user, Set<GrantedAuthority> grantedAuthorities) {
-        // create UserDetails so #{principal.username} works
-        UserDetails userDetails =
-            new org.springframework.security.core.userdetails.User(user.getLogin(),
-            "N/A", grantedAuthorities);
-        // update Spring Security Authorities to match groups claim from IdP
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-            userDetails, "N/A", grantedAuthorities);
-        token.setDetails(details);
-        return token;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Set<Authority> extractAuthorities(OAuth2Authentication authentication, Map<String, Object> details) {
-        Set<Authority> userAuthorities;
-        // get roles from details
-        if (details.get("roles") != null) {
-            userAuthorities = extractAuthorities((List<String>) details.get("roles"));
-            // if roles don't exist, try groups
-        } else if (details.get("groups") != null) {
-            userAuthorities = extractAuthorities((List<String>) details.get("groups"));
+    /**
+     * Returns the user from an OAuth 2.0 login or resource server with JWT.
+     * Synchronizes the user in the local repository.
+     *
+     * @param authToken the authentication token.
+     * @return the user from the authentication.
+     */
+    public UserDTO getUserFromAuthentication(AbstractAuthenticationToken authToken) {
+        Map<String, Object> attributes;
+        if (authToken instanceof OAuth2AuthenticationToken) {
+            attributes = ((OAuth2AuthenticationToken) authToken).getPrincipal().getAttributes();
+        } else if (authToken instanceof JwtAuthenticationToken) {
+            attributes = ((JwtAuthenticationToken) authToken).getTokenAttributes();
         } else {
-            userAuthorities = authoritiesFromStringStream(
-                authentication.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-            );
+            throw new IllegalArgumentException("AuthenticationToken is not OAuth2 or JWT!");
         }
-        return userAuthorities;
+        User user = getUser(attributes);
+        user.setAuthorities(authToken.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .map(authority -> {
+                Authority auth = new Authority();
+                auth.setName(authority);
+                return auth;
+            })
+            .collect(Collectors.toSet()));
+        return new UserDTO(syncUserWithIdP(attributes, user));
     }
 
     private static User getUser(Map<String, Object> details) {
         User user = new User();
-        user.setId((String) details.get("sub"));
+        // handle resource server JWT, where sub claim is email and uid is ID
+        if (details.get("uid") != null) {
+            user.setId((String) details.get("uid"));
+            user.setLogin((String) details.get("sub"));
+        } else {
+            user.setId((String) details.get("sub"));
+        }
         if (details.get("preferred_username") != null) {
             user.setLogin(((String) details.get("preferred_username")).toLowerCase());
-        } else {
+        } else if (user.getLogin() == null) {
             user.setLogin(user.getId());
         }
         if (details.get("given_name") != null) {
@@ -264,18 +241,23 @@ public class UserService {
         }
         if (details.get("email") != null) {
             user.setEmail(((String) details.get("email")).toLowerCase());
+        } else {
+            user.setEmail((String) details.get("sub"));
         }
         if (details.get("langKey") != null) {
             user.setLangKey((String) details.get("langKey"));
         } else if (details.get("locale") != null) {
+            // trim off country code if it exists
             String locale = (String) details.get("locale");
-            if (locale.contains("-")) {
-              String langKey = locale.substring(0, locale.indexOf('-'));
-              user.setLangKey(langKey);
-            } else if (locale.contains("_")) {
-              String langKey = locale.substring(0, locale.indexOf('_'));
-              user.setLangKey(langKey);
+            if (locale.contains("_")) {
+                locale = locale.substring(0, locale.indexOf("_"));
+            } else if (locale.contains("-")) {
+                locale = locale.substring(0, locale.indexOf("-"));
             }
+            user.setLangKey(locale.toLowerCase());
+        } else {
+            // set langKey to default if not specified by IdP
+            user.setLangKey(Constants.DEFAULT_LANGUAGE);
         }
         if (details.get("picture") != null) {
             user.setImageUrl((String) details.get("picture"));
@@ -284,23 +266,10 @@ public class UserService {
         return user;
     }
 
-    private static Set<Authority> extractAuthorities(List<String> values) {
-        return authoritiesFromStringStream(
-            values.stream().filter(role -> role.startsWith("ROLE_"))
-        );
-    }
-
-    private static Set<Authority> authoritiesFromStringStream(Stream<String> strings) {
-        return strings
-                    .map(string -> {
-                        Authority auth = new Authority();
-                        auth.setName(string);
-                        return auth;
-                    }).collect(Collectors.toSet());
-    }
-
     private void clearUserCaches(User user) {
         Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE)).evict(user.getLogin());
-        Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE)).evict(user.getEmail());
+        if (user.getEmail() != null) {
+            Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE)).evict(user.getEmail());
+        }
     }
 }

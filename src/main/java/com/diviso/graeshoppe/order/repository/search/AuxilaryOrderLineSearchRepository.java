@@ -4,7 +4,7 @@ import com.diviso.graeshoppe.order.domain.AuxilaryOrderLine;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 /**
- * Spring Data Elasticsearch repository for the AuxilaryOrderLine entity.
+ * Spring Data Elasticsearch repository for the {@link AuxilaryOrderLine} entity.
  */
 public interface AuxilaryOrderLineSearchRepository extends ElasticsearchRepository<AuxilaryOrderLine, Long> {
 }

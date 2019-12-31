@@ -6,7 +6,7 @@ import com.diviso.graeshoppe.order.service.dto.ApprovalDetailsDTO;
 import org.mapstruct.*;
 
 /**
- * Mapper for the entity ApprovalDetails and its DTO ApprovalDetailsDTO.
+ * Mapper for the entity {@link ApprovalDetails} and its DTO {@link ApprovalDetailsDTO}.
  */
 @Mapper(componentModel = "spring", uses = {})
 public interface ApprovalDetailsMapper extends EntityMapper<ApprovalDetailsDTO, ApprovalDetails> {

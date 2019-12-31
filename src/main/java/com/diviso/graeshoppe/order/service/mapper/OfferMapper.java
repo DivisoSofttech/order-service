@@ -6,7 +6,7 @@ import com.diviso.graeshoppe.order.service.dto.OfferDTO;
 import org.mapstruct.*;
 
 /**
- * Mapper for the entity Offer and its DTO OfferDTO.
+ * Mapper for the entity {@link Offer} and its DTO {@link OfferDTO}.
  */
 @Mapper(componentModel = "spring", uses = {OrderMapper.class})
 public interface OfferMapper extends EntityMapper<OfferDTO, Offer> {

@@ -2,8 +2,6 @@ package com.diviso.graeshoppe.order.repository;
 
 import com.diviso.graeshoppe.order.domain.DeliveryInfo;
 
-import java.util.Optional;
-
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 

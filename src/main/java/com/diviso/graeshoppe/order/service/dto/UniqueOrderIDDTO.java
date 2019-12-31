@@ -3,7 +3,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * A DTO for the UniqueOrderID entity.
+ * A DTO for the {@link com.diviso.graeshoppe.order.domain.UniqueOrderID} entity.
  */
 public class UniqueOrderIDDTO implements Serializable {
 

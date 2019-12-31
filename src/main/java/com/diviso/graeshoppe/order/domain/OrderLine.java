@@ -1,17 +1,14 @@
 package com.diviso.graeshoppe.order.domain;
-
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 
-import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Objects;
 
 /**
  * A OrderLine.
@@ -19,13 +16,14 @@ import java.util.Objects;
 @Entity
 @Table(name = "order_line")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-@Document(indexName = "orderline")
+@org.springframework.data.elasticsearch.annotations.Document(indexName = "orderline")
 public class OrderLine implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @org.springframework.data.elasticsearch.annotations.Field(type = FieldType.Keyword)
     private Long id;
 
     @Column(name = "product_id")
@@ -40,13 +38,14 @@ public class OrderLine implements Serializable {
     @Column(name = "total")
     private Double total;
 
+    @OneToMany(mappedBy = "orderLine")
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+    private Set<AuxilaryOrderLine> requiedAuxilaries = new HashSet<>();
+
     @ManyToOne
     @JsonIgnoreProperties("orderLines")
     private Order order;
 
-    @OneToMany(mappedBy = "orderLine")
-    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-    private Set<AuxilaryOrderLine> requiedAuxilaries = new HashSet<>();
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
         return id;
@@ -108,19 +107,6 @@ public class OrderLine implements Serializable {
         this.total = total;
     }
 
-    public Order getOrder() {
-        return order;
-    }
-
-    public OrderLine order(Order order) {
-        this.order = order;
-        return this;
-    }
-
-    public void setOrder(Order order) {
-        this.order = order;
-    }
-
     public Set<AuxilaryOrderLine> getRequiedAuxilaries() {
         return requiedAuxilaries;
     }
@@ -145,6 +131,19 @@ public class OrderLine implements Serializable {
     public void setRequiedAuxilaries(Set<AuxilaryOrderLine> auxilaryOrderLines) {
         this.requiedAuxilaries = auxilaryOrderLines;
     }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public OrderLine order(Order order) {
+        this.order = order;
+        return this;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
+    }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override
@@ -152,19 +151,15 @@ public class OrderLine implements Serializable {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof OrderLine)) {
             return false;
         }
-        OrderLine orderLine = (OrderLine) o;
-        if (orderLine.getId() == null || getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), orderLine.getId());
+        return id != null && id.equals(((OrderLine) o).id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return 31;
     }
 
     @Override

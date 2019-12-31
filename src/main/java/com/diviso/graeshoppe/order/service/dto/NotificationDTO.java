@@ -5,7 +5,7 @@ import java.util.Objects;
 import javax.persistence.Lob;
 
 /**
- * A DTO for the Notification entity.
+ * A DTO for the {@link com.diviso.graeshoppe.order.domain.Notification} entity.
  */
 public class NotificationDTO implements Serializable {
 

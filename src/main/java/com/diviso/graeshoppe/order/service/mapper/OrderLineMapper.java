@@ -6,7 +6,7 @@ import com.diviso.graeshoppe.order.service.dto.OrderLineDTO;
 import org.mapstruct.*;
 
 /**
- * Mapper for the entity OrderLine and its DTO OrderLineDTO.
+ * Mapper for the entity {@link OrderLine} and its DTO {@link OrderLineDTO}.
  */
 @Mapper(componentModel = "spring", uses = {OrderMapper.class})
 public interface OrderLineMapper extends EntityMapper<OrderLineDTO, OrderLine> {
@@ -16,8 +16,9 @@ public interface OrderLineMapper extends EntityMapper<OrderLineDTO, OrderLine> {
     OrderLineDTO toDto(OrderLine orderLine);
 
     @Override
-	@Mapping(source = "orderId", target = "order")
-    @Mapping(target = "requiedAuxilaries", ignore = true)
+	@Mapping(target = "requiedAuxilaries", ignore = true)
+    @Mapping(target = "removeRequiedAuxilaries", ignore = true)
+    @Mapping(source = "orderId", target = "order")
     OrderLine toEntity(OrderLineDTO orderLineDTO);
 
     default OrderLine fromId(Long id) {

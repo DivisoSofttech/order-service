@@ -1,19 +1,15 @@
 package com.diviso.graeshoppe.order.domain;
-
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 
-import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Objects;
 
 /**
  * A Order.
@@ -21,13 +17,14 @@ import java.util.Objects;
 @Entity
 @Table(name = "jhi_order")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-@Document(indexName = "order")
+@org.springframework.data.elasticsearch.annotations.Document(indexName = "order")
 public class Order implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @org.springframework.data.elasticsearch.annotations.Field(type = FieldType.Keyword)
     private Long id;
 
     @Column(name = "order_id")
@@ -39,7 +36,7 @@ public class Order implements Serializable {
     @Column(name = "store_id")
     private String storeId;
 
-    @Column(name = "jhi_date")
+    @Column(name = "date")
     private Instant date;
 
     @Column(name = "grand_total")
@@ -63,6 +60,9 @@ public class Order implements Serializable {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "time_zone")
+    private String timeZone;
+
     @OneToOne
     @JoinColumn(unique = true)
     private DeliveryInfo deliveryInfo;
@@ -74,9 +74,11 @@ public class Order implements Serializable {
     @OneToMany(mappedBy = "order")
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<OrderLine> orderLines = new HashSet<>();
+
     @OneToMany(mappedBy = "order")
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<Offer> appliedOffers = new HashSet<>();
+
     @ManyToOne
     @JsonIgnoreProperties("orders")
     private Status status;
@@ -233,6 +235,19 @@ public class Order implements Serializable {
         this.email = email;
     }
 
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public Order timeZone(String timeZone) {
+        this.timeZone = timeZone;
+        return this;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
+    }
+
     public DeliveryInfo getDeliveryInfo() {
         return deliveryInfo;
     }
@@ -328,19 +343,15 @@ public class Order implements Serializable {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Order)) {
             return false;
         }
-        Order order = (Order) o;
-        if (order.getId() == null || getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), order.getId());
+        return id != null && id.equals(((Order) o).id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return 31;
     }
 
     @Override
@@ -358,6 +369,7 @@ public class Order implements Serializable {
             ", allergyNote='" + getAllergyNote() + "'" +
             ", preOrderDate='" + getPreOrderDate() + "'" +
             ", email='" + getEmail() + "'" +
+            ", timeZone='" + getTimeZone() + "'" +
             "}";
     }
 }

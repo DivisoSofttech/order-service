@@ -19,7 +19,7 @@ import java.util.Optional;
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
- * Service Implementation for managing Status.
+ * Service Implementation for managing {@link Status}.
  */
 @Service
 @Transactional
@@ -42,8 +42,8 @@ public class StatusServiceImpl implements StatusService {
     /**
      * Save a status.
      *
-     * @param statusDTO the entity to save
-     * @return the persisted entity
+     * @param statusDTO the entity to save.
+     * @return the persisted entity.
      */
     @Override
     public StatusDTO save(StatusDTO statusDTO) {
@@ -58,8 +58,8 @@ public class StatusServiceImpl implements StatusService {
     /**
      * Get all the statuses.
      *
-     * @param pageable the pagination information
-     * @return the list of entities
+     * @param pageable the pagination information.
+     * @return the list of entities.
      */
     @Override
     @Transactional(readOnly = true)
@@ -73,8 +73,8 @@ public class StatusServiceImpl implements StatusService {
     /**
      * Get one status by id.
      *
-     * @param id the id of the entity
-     * @return the entity
+     * @param id the id of the entity.
+     * @return the entity.
      */
     @Override
     @Transactional(readOnly = true)
@@ -87,7 +87,7 @@ public class StatusServiceImpl implements StatusService {
     /**
      * Delete the status by id.
      *
-     * @param id the id of the entity
+     * @param id the id of the entity.
      */
     @Override
     public void delete(Long id) {
@@ -99,9 +99,9 @@ public class StatusServiceImpl implements StatusService {
     /**
      * Search for the status corresponding to the query.
      *
-     * @param query the query of the search
-     * @param pageable the pagination information
-     * @return the list of entities
+     * @param query the query of the search.
+     * @param pageable the pagination information.
+     * @return the list of entities.
      */
     @Override
     @Transactional(readOnly = true)

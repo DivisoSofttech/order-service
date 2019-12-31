@@ -1,15 +1,12 @@
 package com.diviso.graeshoppe.order.domain;
-
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 
-import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.Objects;
 
 /**
  * A Notification.
@@ -17,13 +14,14 @@ import java.util.Objects;
 @Entity
 @Table(name = "notification")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-@Document(indexName = "notification")
+@org.springframework.data.elasticsearch.annotations.Document(indexName = "notification")
 public class Notification implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @org.springframework.data.elasticsearch.annotations.Field(type = FieldType.Keyword)
     private Long id;
 
     @Column(name = "title")
@@ -35,7 +33,7 @@ public class Notification implements Serializable {
     @Column(name = "target_id")
     private String targetId;
 
-    @Column(name = "jhi_type")
+    @Column(name = "type")
     private String type;
 
     @Lob
@@ -45,7 +43,7 @@ public class Notification implements Serializable {
     @Column(name = "image_content_type")
     private String imageContentType;
 
-    @Column(name = "jhi_date")
+    @Column(name = "date")
     private Instant date;
 
     @Column(name = "receiver_id")
@@ -186,19 +184,15 @@ public class Notification implements Serializable {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Notification)) {
             return false;
         }
-        Notification notification = (Notification) o;
-        if (notification.getId() == null || getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), notification.getId());
+        return id != null && id.equals(((Notification) o).id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return 31;
     }
 
     @Override

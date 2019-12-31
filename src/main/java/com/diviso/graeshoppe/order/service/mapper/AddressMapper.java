@@ -6,7 +6,7 @@ import com.diviso.graeshoppe.order.service.dto.AddressDTO;
 import org.mapstruct.*;
 
 /**
- * Mapper for the entity Address and its DTO AddressDTO.
+ * Mapper for the entity {@link Address} and its DTO {@link AddressDTO}.
  */
 @Mapper(componentModel = "spring", uses = {})
 public interface AddressMapper extends EntityMapper<AddressDTO, Address> {

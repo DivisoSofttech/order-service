@@ -3,7 +3,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * A DTO for the Status entity.
+ * A DTO for the {@link com.diviso.graeshoppe.order.domain.Status} entity.
  */
 public class StatusDTO implements Serializable {
 

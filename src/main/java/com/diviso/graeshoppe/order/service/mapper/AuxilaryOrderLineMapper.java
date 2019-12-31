@@ -6,7 +6,7 @@ import com.diviso.graeshoppe.order.service.dto.AuxilaryOrderLineDTO;
 import org.mapstruct.*;
 
 /**
- * Mapper for the entity AuxilaryOrderLine and its DTO AuxilaryOrderLineDTO.
+ * Mapper for the entity {@link AuxilaryOrderLine} and its DTO {@link AuxilaryOrderLineDTO}.
  */
 @Mapper(componentModel = "spring", uses = {OrderLineMapper.class})
 public interface AuxilaryOrderLineMapper extends EntityMapper<AuxilaryOrderLineDTO, AuxilaryOrderLine> {

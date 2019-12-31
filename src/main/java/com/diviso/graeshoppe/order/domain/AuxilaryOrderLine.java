@@ -1,15 +1,12 @@
 package com.diviso.graeshoppe.order.domain;
-
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 
-import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * A AuxilaryOrderLine.
@@ -17,13 +14,14 @@ import java.util.Objects;
 @Entity
 @Table(name = "auxilary_order_line")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-@Document(indexName = "auxilaryorderline")
+@org.springframework.data.elasticsearch.annotations.Document(indexName = "auxilaryorderline")
 public class AuxilaryOrderLine implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @org.springframework.data.elasticsearch.annotations.Field(type = FieldType.Keyword)
     private Long id;
 
     @Column(name = "product_id")
@@ -122,19 +120,15 @@ public class AuxilaryOrderLine implements Serializable {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof AuxilaryOrderLine)) {
             return false;
         }
-        AuxilaryOrderLine auxilaryOrderLine = (AuxilaryOrderLine) o;
-        if (auxilaryOrderLine.getId() == null || getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), auxilaryOrderLine.getId());
+        return id != null && id.equals(((AuxilaryOrderLine) o).id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return 31;
     }
 
     @Override

@@ -2,21 +2,22 @@ package com.diviso.graeshoppe.order.web.rest;
 import com.diviso.graeshoppe.order.resource.assembler.CommandResource;
 import com.diviso.graeshoppe.order.service.ApprovalDetailsService;
 import com.diviso.graeshoppe.order.web.rest.errors.BadRequestAlertException;
-import com.diviso.graeshoppe.order.web.rest.util.HeaderUtil;
-import com.diviso.graeshoppe.order.web.rest.util.PaginationUtil;
+import io.github.jhipster.web.util.HeaderUtil;
+import io.github.jhipster.web.util.PaginationUtil;
 import com.diviso.graeshoppe.order.service.dto.ApprovalDetailsDTO;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +29,8 @@ import java.util.Optional;
 public class ApprovalDetailsResource {
 
     private final Logger log = LoggerFactory.getLogger(ApprovalDetailsResource.class);
-
+    @Value("${jhipster.clientApp.name}")
+    private String applicationName;
     private static final String ENTITY_NAME = "orderApprovalDetails";
 
     private final ApprovalDetailsService approvalDetailsService;
@@ -52,7 +54,7 @@ public class ApprovalDetailsResource {
         }
         CommandResource result = approvalDetailsService.save(approvalDetailsDTO,taskId );
         return ResponseEntity.created(new URI("/api/approval-details/" + result.getSelfId()))
-            .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getSelfId().toString()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getSelfId().toString()))
             .body(result);
     }
 
@@ -73,7 +75,7 @@ public class ApprovalDetailsResource {
         }
         ApprovalDetailsDTO result = approvalDetailsService.update(approvalDetailsDTO);
         return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, approvalDetailsDTO.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true,ENTITY_NAME, approvalDetailsDTO.getId().toString()))
             .body(result);
     }
 
@@ -87,7 +89,7 @@ public class ApprovalDetailsResource {
     public ResponseEntity<List<ApprovalDetailsDTO>> getAllApprovalDetails(Pageable pageable) {
         log.debug("REST request to get a page of ApprovalDetails");
         Page<ApprovalDetailsDTO> page = approvalDetailsService.findAll(pageable);
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/approval-details");
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(),page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
@@ -114,7 +116,7 @@ public class ApprovalDetailsResource {
     public ResponseEntity<Void> deleteApprovalDetails(@PathVariable Long id) {
         log.debug("REST request to delete ApprovalDetails : {}", id);
         approvalDetailsService.delete(id);
-        return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+        return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true,ENTITY_NAME, id.toString())).build();
     }
 
     /**
@@ -129,7 +131,7 @@ public class ApprovalDetailsResource {
     public ResponseEntity<List<ApprovalDetailsDTO>> searchApprovalDetails(@RequestParam String query, Pageable pageable) {
         log.debug("REST request to search for a page of ApprovalDetails for query {}", query);
         Page<ApprovalDetailsDTO> page = approvalDetailsService.search(query, pageable);
-        HttpHeaders headers = PaginationUtil.generateSearchPaginationHttpHeaders(query, page, "/api/_search/approval-details");
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 

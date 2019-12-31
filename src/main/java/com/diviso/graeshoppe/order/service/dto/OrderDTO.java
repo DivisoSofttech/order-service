@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * A DTO for the Order entity.
+ * A DTO for the {@link com.diviso.graeshoppe.order.domain.Order} entity.
  */
 public class OrderDTO implements Serializable {
 
@@ -31,6 +31,8 @@ public class OrderDTO implements Serializable {
     private Instant preOrderDate;
 
     private String email;
+
+    private String timeZone;
 
 
     private Long deliveryInfoId;
@@ -135,6 +137,14 @@ public class OrderDTO implements Serializable {
         this.email = email;
     }
 
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
+    }
+
     public Long getDeliveryInfoId() {
         return deliveryInfoId;
     }
@@ -195,9 +205,10 @@ public class OrderDTO implements Serializable {
             ", allergyNote='" + getAllergyNote() + "'" +
             ", preOrderDate='" + getPreOrderDate() + "'" +
             ", email='" + getEmail() + "'" +
-            ", deliveryInfo=" + getDeliveryInfoId() +
-            ", approvalDetails=" + getApprovalDetailsId() +
-            ", status=" + getStatusId() +
+            ", timeZone='" + getTimeZone() + "'" +
+            ", deliveryInfoId=" + getDeliveryInfoId() +
+            ", approvalDetailsId=" + getApprovalDetailsId() +
+            ", statusId=" + getStatusId() +
             "}";
     }
 }

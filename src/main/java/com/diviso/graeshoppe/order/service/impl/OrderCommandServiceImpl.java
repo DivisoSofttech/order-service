@@ -1,9 +1,11 @@
 package com.diviso.graeshoppe.order.service.impl;
 
+import com.diviso.graeshoppe.order.service.KafkaMessagingService;
 import com.diviso.graeshoppe.order.service.OrderCommandService;
 import com.diviso.graeshoppe.order.service.OrderQueryService;
 import com.diviso.graeshoppe.order.service.UniqueOrderIDService;
 import com.diviso.graeshoppe.order.service.UserService;
+import com.diviso.graeshoppe.order.service.KafkaMessagingService.PublishResult;
 import com.diviso.graeshoppe.order.avro.Address;
 import com.diviso.graeshoppe.order.avro.ApprovalDetails;
 import com.diviso.graeshoppe.order.avro.DeliveryInfo;
@@ -21,8 +23,6 @@ import com.diviso.graeshoppe.order.client.bpmn.model.SubmitFormRequest;
 import com.diviso.graeshoppe.order.client.customer.api.CustomerResourceApi;
 import com.diviso.graeshoppe.order.client.customer.model.Customer;
 import com.diviso.graeshoppe.order.client.store.api.StoreResourceApi;
-import com.diviso.graeshoppe.order.client.store.model.Store;
-import com.diviso.graeshoppe.order.config.MessageBinderConfiguration;
 import com.diviso.graeshoppe.order.domain.AuxilaryOrderLine;
 import com.diviso.graeshoppe.order.domain.Offer;
 import com.diviso.graeshoppe.order.domain.Order;
@@ -36,6 +36,7 @@ import com.diviso.graeshoppe.order.resource.assembler.ResourceAssembler;
 import com.diviso.graeshoppe.order.service.dto.OrderDTO;
 import com.diviso.graeshoppe.order.service.dto.UniqueOrderIDDTO;
 import com.diviso.graeshoppe.order.service.mapper.OrderMapper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +44,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.integration.support.MessageBuilder;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,6 +53,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
@@ -73,7 +73,6 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
 	private final OfferRepository offerRepository;
 
-	private final SimpMessagingTemplate template;
 	@Autowired
 	private OrderQueryService orderQueryService;
 	@Autowired
@@ -90,7 +89,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
 	@Autowired
 	private ProcessInstancesApi processInstancesApi;
-	
+
 	@Value("${app.orderId-prefix}")
 	private String orderIdPrefix;
 
@@ -98,10 +97,10 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 	private UserService userService;
 
 	@Autowired
-	private MessageBinderConfiguration messageChannel;
+	private FormsApi formsApi;
 
 	@Autowired
-	private FormsApi formsApi;
+	private KafkaMessagingService kafkaMessagingService;
 
 	@Autowired
 	private TasksApi tasksApi;
@@ -115,10 +114,9 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 	@Autowired
 	public OrderCommandServiceImpl(OrderRepository orderRepository, OrderMapper orderMapper,
 			OrderSearchRepository orderSearchRepository, OfferRepository offerRepository,
-			SimpMessagingTemplate template, OrderLineRepository orderLineRepository) {
+			OrderLineRepository orderLineRepository) {
 		this.orderRepository = orderRepository;
 		this.orderMapper = orderMapper;
-		this.template = template;
 		this.orderSearchRepository = orderSearchRepository;
 		this.orderLineRepository = orderLineRepository;
 		this.offerRepository = offerRepository;
@@ -133,7 +131,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 	@Override
 	public CommandResource save(OrderDTO orderDTO) {
 		UniqueOrderIDDTO orderIdDTO = orderIdService.save(new UniqueOrderIDDTO());
-		String orderId = orderIdPrefix+""+ orderIdDTO.getId();
+		String orderId = orderIdPrefix + "" + orderIdDTO.getId();
 		log.info("Generated Order id is " + orderId);
 		orderDTO.setOrderId(orderId);
 		log.debug("Request to save Order : {}", orderDTO);
@@ -201,7 +199,8 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 		orderId.setType("String");
 		orderId.setValue(trackingId);
 		properties.add(orderId);
-		//String type = storeResourceApi.findStoreSettingsByStoreIdUsingGET(storeId).getBody().getOrderAcceptType();
+		// String type =
+		// storeResourceApi.findStoreSettingsByStoreIdUsingGET(storeId).getBody().getOrderAcceptType();
 		RestFormProperty acceptType = new RestFormProperty();
 		acceptType.setId("acceptType");
 		acceptType.setName("acceptType");
@@ -218,7 +217,6 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 		return commandResource;
 	}
 
-	
 	/**
 	 * Get all the orders.
 	 *
@@ -271,57 +269,53 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 		return orderSearchRepository.search(queryStringQuery(query), pageable).map(orderMapper::toDto);
 	}
 
-	
 	@Override
-	public boolean publishMesssage(String orderId) {
-	Order order = orderRepository.findByOrderIdAndStatus_Name(orderId, "payment-processed-unapproved").get();
-		
-	Customer customer = customerResourceApi.findByReferenceUsingGET(order.getCustomerId()).getBody();
-	Long phone = customer.getContact().getMobileNumber();
-		com.diviso.graeshoppe.order.domain.DeliveryInfo deliveryInfo = orderQueryService.findDeliveryInfoByOrderId(orderId);
-		if(deliveryInfo!=null) {
+	public void publishMesssage(String orderId) {
+		Order order = orderRepository.findByOrderIdAndStatus_Name(orderId, "payment-processed-unapproved").get();
+
+		Customer customer = customerResourceApi.findByReferenceUsingGET(order.getCustomerId()).getBody();
+		Long phone = customer.getContact().getMobileNumber();
+		com.diviso.graeshoppe.order.domain.DeliveryInfo deliveryInfo = orderQueryService
+				.findDeliveryInfoByOrderId(orderId);
+		if (deliveryInfo != null) {
 			if (deliveryInfo.getDeliveryAddress() != null) {
-				com.diviso.graeshoppe.order.domain.Address address =deliveryInfo.getDeliveryAddress();
-				if(address.getPhone()!=null) {
+				com.diviso.graeshoppe.order.domain.Address address = deliveryInfo.getDeliveryAddress();
+				if (address.getPhone() != null) {
 					phone = address.getPhone();
 				}
 			}
 		}
-		log.info("Phone number is publishing to kafka "+ phone);
-		
+		log.info("Phone number is publishing to kafka " + phone);
+
 		order.setOrderLines(orderLineRepository.findByOrder_OrderId(order.getOrderId()));
 		order.setAppliedOffers(offerRepository.findByOrder_Id(order.getId()));
-		log.info("Applied offers in order is "+order.getAppliedOffers());
+		log.info("Applied offers in order is " + order.getAppliedOffers());
 		long restaurantCount = orderRepository.countByStoreIdAndCustomerId(order.getStoreId(), order.getCustomerId());
 		long graeshoppeCount = orderRepository.countByCustomerId(order.getCustomerId());
 		log.info("Order fetched from db is  " + order);
 		log.info("restaurant total count is " + restaurantCount + " Graeshoppe total count " + graeshoppeCount);
 		Builder orderAvro = com.diviso.graeshoppe.order.avro.Order.newBuilder().setOrderId(order.getOrderId())
-				.setAllergyNote(order.getAllergyNote())
-				.setEventType("CREATE")
-				.setCustomerId(order.getCustomerId()).setStoreId(order.getStoreId())
-				.setPaymentRef(order.getPaymentRef()).setCustomerPhone(phone).setOrderCountgraeshoppe(graeshoppeCount)
-				.setOrderCountRestaurant(restaurantCount)
-				.setGrandTotal(order.getGrandTotal())
-				.setSubTotal(order.getSubTotal()).setEmail(order.getEmail())
-				.setPaymentMode(order.getPaymentMode())
-				.setPaymentRef(order.getPaymentRef())
+				.setAllergyNote(order.getAllergyNote()).setEventType("CREATE").setCustomerId(order.getCustomerId())
+				.setStoreId(order.getStoreId()).setPaymentRef(order.getPaymentRef()).setCustomerPhone(phone)
+				.setOrderCountgraeshoppe(graeshoppeCount).setOrderCountRestaurant(restaurantCount)
+				.setGrandTotal(order.getGrandTotal()).setSubTotal(order.getSubTotal()).setEmail(order.getEmail())
+				.setPaymentMode(order.getPaymentMode()).setPaymentRef(order.getPaymentRef())
 				.setStatus(Status.newBuilder().setId(order.getStatus().getId()).setName(order.getStatus().getName())
 						.build())
 				.setOrderLines(order.getOrderLines().stream().map(this::toAvroOrderLine).collect(Collectors.toList()));
-		if(order.getPreOrderDate()!=null) {
+		if (order.getPreOrderDate() != null) {
 			orderAvro.setPreOrderDate(order.getPreOrderDate().toEpochMilli());
 		}
-		if(order.getDate()!=null) {
+		if (order.getDate() != null) {
 			orderAvro.setDate(order.getDate().toEpochMilli());
 
 		}
-			
+
 		if (order.getApprovalDetails() == null) {
 			log.info("Approval details not exists");
 			orderAvro.setApprovalDetails(ApprovalDetails.newBuilder()
 					.setExpectedDelivery(order.getDate().plus(Duration.ofMinutes(40)).toEpochMilli())
-					.setAcceptedAt(order.getDate().plus(Duration.ofMinutes(5)).toEpochMilli()).build()); 
+					.setAcceptedAt(order.getDate().plus(Duration.ofMinutes(5)).toEpochMilli()).build());
 		} else {
 			log.info("Approval details exists");
 			orderAvro.setApprovalDetails(ApprovalDetails.newBuilder()
@@ -345,16 +339,15 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 					.setLandmark(order.getDeliveryInfo().getDeliveryAddress().getLandmark())
 					.setPhone(order.getDeliveryInfo().getDeliveryAddress().getPhone())
 					.setEmail(order.getDeliveryInfo().getDeliveryAddress().getEmail())
-					.setAlternatePhone(order.getDeliveryInfo().getDeliveryAddress().getAlternatePhone())
-					.build());
+					.setAlternatePhone(order.getDeliveryInfo().getDeliveryAddress().getAlternatePhone()).build());
 
 		}
-		List<com.diviso.graeshoppe.order.avro.Offer> offerAvroList=new ArrayList<>();
-		order.getAppliedOffers().forEach(offer->{
-			com.diviso.graeshoppe.order.avro.Offer offerAvro=com.diviso.graeshoppe.order.avro.Offer.newBuilder()
+		List<com.diviso.graeshoppe.order.avro.Offer> offerAvroList = new ArrayList<>();
+		order.getAppliedOffers().forEach(offer -> {
+			com.diviso.graeshoppe.order.avro.Offer offerAvro = com.diviso.graeshoppe.order.avro.Offer.newBuilder()
 					.setOfferRef(offer.getOfferRef()).setDiscountAmount(offer.getOrderDiscountAmount()).build();
 			offerAvroList.add(offerAvro);
-			orderAvro.setDiscountAmount(offer.getOrderDiscountAmount()); //needs to change
+			orderAvro.setDiscountAmount(offer.getOrderDiscountAmount()); // needs to change
 		});
 		orderAvro.setOfferLines(offerAvroList);
 		if (order.getDeliveryInfo().getDeliveryCharge() == null) {
@@ -365,14 +358,24 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 		orderAvro.getDeliveryInfoBuilder().build();
 		// orderAvro.setOfferLines(order.getAppliedOffers().stream().map(this::toAvroOffer).collect(Collectors.toList()));
 		com.diviso.graeshoppe.order.avro.Order message = orderAvro.build();
-		return messageChannel.orderOut().send(MessageBuilder.withPayload(message).build());
+		try {
+			PublishResult result = kafkaMessagingService.publishOrder(message);
+			log.info("Publish result avro message order is " + result);
+		} catch (ExecutionException e) {
+			log.error("Error sending avro message " + e.getMessage());
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			log.error("Error sending avro message " + e.getMessage());
+
+		}
 	}
 
 	private com.diviso.graeshoppe.order.avro.OrderLine toAvroOrderLine(OrderLine orderline) {
 		return com.diviso.graeshoppe.order.avro.OrderLine.newBuilder().setProductId(orderline.getProductId())
 				.setQuantity(orderline.getQuantity()).setPricePerUnit(orderline.getPricePerUnit())
-				.setTotal(orderline.getTotal()).setAuxilaryOrderLines(orderline.getRequiedAuxilaries()
-						.stream().map(this::toAvroAuxilaryLine).collect(Collectors.toList()))
+				.setTotal(orderline.getTotal()).setAuxilaryOrderLines(orderline.getRequiedAuxilaries().stream()
+						.map(this::toAvroAuxilaryLine).collect(Collectors.toList()))
 				.build();
 	}
 

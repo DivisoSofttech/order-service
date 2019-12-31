@@ -8,26 +8,23 @@ import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 /**
- * Service Interface for managing Notification.
+ * Service Interface for managing {@link com.diviso.graeshoppe.order.domain.Notification}.
  */
 public interface NotificationCommandService {
 
-	
-	  Boolean publishNotificationToMessageBroker(NotificationDTO notification);
     /**
      * Save a notification.
      *
-     * @param notificationDTO the entity to save
-     * @return the persisted entity
+     * @param notificationDTO the entity to save.
+     * @return the persisted entity.
      */
-	
     NotificationDTO save(NotificationDTO notificationDTO);
 
     /**
      * Get all the notifications.
      *
-     * @param pageable the pagination information
-     * @return the list of entities
+     * @param pageable the pagination information.
+     * @return the list of entities.
      */
     Page<NotificationDTO> findAll(Pageable pageable);
 
@@ -35,25 +32,27 @@ public interface NotificationCommandService {
     /**
      * Get the "id" notification.
      *
-     * @param id the id of the entity
-     * @return the entity
+     * @param id the id of the entity.
+     * @return the entity.
      */
     Optional<NotificationDTO> findOne(Long id);
 
     /**
      * Delete the "id" notification.
      *
-     * @param id the id of the entity
+     * @param id the id of the entity.
      */
     void delete(Long id);
 
     /**
      * Search for the notification corresponding to the query.
      *
-     * @param query the query of the search
+     * @param query the query of the search.
      * 
-     * @param pageable the pagination information
-     * @return the list of entities
+     * @param pageable the pagination information.
+     * @return the list of entities.
      */
     Page<NotificationDTO> search(String query, Pageable pageable);
+
+	void publishNotificationToMessageBroker(NotificationDTO resultNotification);
 }

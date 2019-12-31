@@ -8,9 +8,7 @@ import com.diviso.graeshoppe.order.client.bpmn.api.TasksApi;
 import com.diviso.graeshoppe.order.client.bpmn.model.RestFormProperty;
 import com.diviso.graeshoppe.order.client.bpmn.model.SubmitFormRequest;
 import com.diviso.graeshoppe.order.client.customer.api.CustomerResourceApi;
-import com.diviso.graeshoppe.order.client.customer.model.Customer;
 import com.diviso.graeshoppe.order.domain.ApprovalDetails;
-import com.diviso.graeshoppe.order.domain.DeliveryInfo;
 import com.diviso.graeshoppe.order.repository.ApprovalDetailsRepository;
 import com.diviso.graeshoppe.order.repository.OrderRepository;
 import com.diviso.graeshoppe.order.repository.search.ApprovalDetailsSearchRepository;
@@ -107,8 +105,7 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		notificationDTO.setReceiverId(orderDTO.getCustomerId());
 		notificationDTO.setType("Approved-Notification");
 		NotificationDTO resultNotification=notificationService.save(notificationDTO); // sending notifications from here to the customer
-		Boolean status = notificationService.publishNotificationToMessageBroker(resultNotification);
-		log.info("Notification publish status is " + status);
+		notificationService.publishNotificationToMessageBroker(resultNotification);
 		orderDTO.setApprovalDetailsId(result.getId());
 		orderDTO.setStatusId(7l); //payment-processed-approved
 		orderService.update(orderDTO);

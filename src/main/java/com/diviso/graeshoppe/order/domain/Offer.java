@@ -1,28 +1,27 @@
 package com.diviso.graeshoppe.order.domain;
-
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 
-import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.Serializable;
-import java.util.Objects;
 
-/** * A Offer.
+/**
+ * A Offer.
  */
 @Entity
 @Table(name = "offer")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-@Document(indexName = "offerline")
+@org.springframework.data.elasticsearch.annotations.Document(indexName = "offerline")
 public class Offer implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @org.springframework.data.elasticsearch.annotations.Field(type = FieldType.Keyword)
     private Long id;
 
     @Column(name = "offer_ref")
@@ -105,19 +104,15 @@ public class Offer implements Serializable {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Offer)) {
             return false;
         }
-        Offer offer = (Offer) o;
-        if (offer.getId() == null || getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), offer.getId());
+        return id != null && id.equals(((Offer) o).id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return 31;
     }
 
     @Override

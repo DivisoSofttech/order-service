@@ -14,150 +14,100 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
- * Service Implementation for managing Order.
+ * Service Implementation for managing {@link Order}.
  */
 @Service
 @Transactional
 public class OrderServiceImpl implements OrderService {
 
-	private final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
+    private final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
 
-	private final OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
-	private final OrderMapper orderMapper;
+    private final OrderMapper orderMapper;
 
-	private final OrderSearchRepository orderSearchRepository;
+    private final OrderSearchRepository orderSearchRepository;
 
-	public OrderServiceImpl(OrderRepository orderRepository, OrderMapper orderMapper,
-			OrderSearchRepository orderSearchRepository) {
-		this.orderRepository = orderRepository;
-		this.orderMapper = orderMapper;
-		this.orderSearchRepository = orderSearchRepository;
-	}
+    public OrderServiceImpl(OrderRepository orderRepository, OrderMapper orderMapper, OrderSearchRepository orderSearchRepository) {
+        this.orderRepository = orderRepository;
+        this.orderMapper = orderMapper;
+        this.orderSearchRepository = orderSearchRepository;
+    }
 
-	/**
-	 * Save a order.
-	 *
-	 * @param orderDTO
-	 *            the entity to save
-	 * @return the persisted entity
-	 */
-	@Override
-	public OrderDTO save(OrderDTO orderDTO) {
-		log.debug("Request to save Order : {}", orderDTO);
-		Order order = orderMapper.toEntity(orderDTO);
-		order = orderRepository.save(order);
-		OrderDTO result = orderMapper.toDto(order);
-		orderSearchRepository.save(order);
-		return result;
-	}
+    /**
+     * Save a order.
+     *
+     * @param orderDTO the entity to save.
+     * @return the persisted entity.
+     */
+    @Override
+    public OrderDTO save(OrderDTO orderDTO) {
+        log.debug("Request to save Order : {}", orderDTO);
+        Order order = orderMapper.toEntity(orderDTO);
+        order = orderRepository.save(order);
+        OrderDTO result = orderMapper.toDto(order);
+        orderSearchRepository.save(order);
+        return result;
+    }
 
-	/**
-	 * Get all the orders.
-	 *
-	 * @param pageable
-	 *            the pagination information
-	 * @return the list of entities
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public Page<OrderDTO> findAll(Pageable pageable) {
-		log.debug("Request to get all Orders");
-		return orderRepository.findAll(pageable).map(orderMapper::toDto);
-	}
+    /**
+     * Get all the orders.
+     *
+     * @param pageable the pagination information.
+     * @return the list of entities.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<OrderDTO> findAll(Pageable pageable) {
+        log.debug("Request to get all Orders");
+        return orderRepository.findAll(pageable)
+            .map(orderMapper::toDto);
+    }
 
-	/**
-	 * Get one order by id.
-	 *
-	 * @param id
-	 *            the id of the entity
-	 * @return the entity
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public Optional<OrderDTO> findOne(Long id) {
-		log.debug("Request to get Order : {}", id);
-		return orderRepository.findById(id).map(orderMapper::toDto);
-	}
 
-	/**
-	 * Delete the order by id.
-	 *
-	 * @param id
-	 *            the id of the entity
-	 */
-	@Override
-	public void delete(Long id) {
-		log.debug("Request to delete Order : {}", id);
-		orderRepository.deleteById(id);
-		orderSearchRepository.deleteById(id);
-	}
+    /**
+     * Get one order by id.
+     *
+     * @param id the id of the entity.
+     * @return the entity.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<OrderDTO> findOne(Long id) {
+        log.debug("Request to get Order : {}", id);
+        return orderRepository.findById(id)
+            .map(orderMapper::toDto);
+    }
 
-	/**
-	 * Search for the order corresponding to the query.
-	 *
-	 * @param query
-	 *            the query of the search
-	 * @param pageable
-	 *            the pagination information
-	 * @return the list of entities
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public Page<OrderDTO> search(String query, Pageable pageable) {
-		log.debug("Request to search for a page of Orders for query {}", query);
-		return orderSearchRepository.search(queryStringQuery(query), pageable).map(orderMapper::toDto);
-	}
+    /**
+     * Delete the order by id.
+     *
+     * @param id the id of the entity.
+     */
+    @Override
+    public void delete(Long id) {
+        log.debug("Request to delete Order : {}", id);
+        orderRepository.deleteById(id);
+        orderSearchRepository.deleteById(id);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.diviso.graeshoppe.order.service.OrderService#findByStoreId(java.lang.
-	 * String)
-	 */
-	@Override
-	public List<Order> findByStoreId(String storeId) {
-		return orderRepository.findByStoreId(storeId);
-	}
-
-	@Override
-	public long countAllOrdersByDateAndStoreId(Instant dateBegin, Instant dateEnd, String storeId) {
-		
-		return orderRepository.countByDateBetweenAndStoreId(dateBegin, dateEnd, storeId);
-	}
-
-	@Override
-	public Integer countOrdersByStoreIdAndDeliveryType(Instant dateBegin, Instant dateEnd, String storeId,
-			String deliveryType) {
-		return orderRepository.countBystoreIdAndDeliveryType(dateBegin, dateEnd, storeId, deliveryType);
-	}
-
-	@Override
-	public List<String> findAllPaymentReferenceByDateAndStoreId(Instant dateBegin, Instant dateEnd, String storeId) {
-		return orderRepository.findAllPaymentRef(dateBegin, dateEnd, storeId);
-	}
-	
-	@Override
-	public List<String> findAllPaymentRefByDeliveryType(Instant dateBegin, Instant dateEnd, String storeId,String deliveryType)
-	{
-		return orderRepository.findAllPaymentRefByDeliveryType(dateBegin, dateEnd, storeId,deliveryType);
-	}
-
-	@Override
-	public Optional<OrderDTO> findByOrderId(String string) {
-		return orderRepository.findByOrderId(string).map(orderMapper::toDto);
-	}
-	
-	
-	
-	
-	
+    /**
+     * Search for the order corresponding to the query.
+     *
+     * @param query the query of the search.
+     * @param pageable the pagination information.
+     * @return the list of entities.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<OrderDTO> search(String query, Pageable pageable) {
+        log.debug("Request to search for a page of Orders for query {}", query);
+        return orderSearchRepository.search(queryStringQuery(query), pageable)
+            .map(orderMapper::toDto);
+    }
 }

@@ -1,14 +1,11 @@
 package com.diviso.graeshoppe.order.domain;
-
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 
-import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * A Address.
@@ -16,13 +13,14 @@ import java.util.Objects;
 @Entity
 @Table(name = "address")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-@Document(indexName = "orderaddress")
+@org.springframework.data.elasticsearch.annotations.Document(indexName = "orderaddress")
 public class Address implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @org.springframework.data.elasticsearch.annotations.Field(type = FieldType.Keyword)
     private Long id;
 
     @Column(name = "customer_id")
@@ -232,19 +230,15 @@ public class Address implements Serializable {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Address)) {
             return false;
         }
-        Address address = (Address) o;
-        if (address.getId() == null || getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), address.getId());
+        return id != null && id.equals(((Address) o).id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return 31;
     }
 
     @Override

@@ -1,14 +1,11 @@
 package com.diviso.graeshoppe.order.domain;
-
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 
-import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * A UniqueOrderID.
@@ -16,13 +13,14 @@ import java.util.Objects;
 @Entity
 @Table(name = "unique_order_id")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-@Document(indexName = "uniqueorderid")
+@org.springframework.data.elasticsearch.annotations.Document(indexName = "uniqueorderid")
 public class UniqueOrderID implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @org.springframework.data.elasticsearch.annotations.Field(type = FieldType.Keyword)
     private Long id;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
@@ -40,19 +38,15 @@ public class UniqueOrderID implements Serializable {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof UniqueOrderID)) {
             return false;
         }
-        UniqueOrderID uniqueOrderID = (UniqueOrderID) o;
-        if (uniqueOrderID.getId() == null || getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), uniqueOrderID.getId());
+        return id != null && id.equals(((UniqueOrderID) o).id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return 31;
     }
 
     @Override

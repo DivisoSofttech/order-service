@@ -6,7 +6,7 @@ import com.diviso.graeshoppe.order.service.dto.StatusDTO;
 import org.mapstruct.*;
 
 /**
- * Mapper for the entity Status and its DTO StatusDTO.
+ * Mapper for the entity {@link Status} and its DTO {@link StatusDTO}.
  */
 @Mapper(componentModel = "spring", uses = {})
 public interface StatusMapper extends EntityMapper<StatusDTO, Status> {

@@ -1,14 +1,11 @@
 package com.diviso.graeshoppe.order.domain;
-
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 
-import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * A Status.
@@ -16,13 +13,14 @@ import java.util.Objects;
 @Entity
 @Table(name = "status")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-@Document(indexName = "status")
+@org.springframework.data.elasticsearch.annotations.Document(indexName = "status")
 public class Status implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @org.springframework.data.elasticsearch.annotations.Field(type = FieldType.Keyword)
     private Long id;
 
     @Column(name = "name")
@@ -56,19 +54,15 @@ public class Status implements Serializable {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Status)) {
             return false;
         }
-        Status status = (Status) o;
-        if (status.getId() == null || getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), status.getId());
+        return id != null && id.equals(((Status) o).id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return 31;
     }
 
     @Override

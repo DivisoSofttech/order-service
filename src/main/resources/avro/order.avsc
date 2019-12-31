@@ -106,6 +106,7 @@
 			   {"name":"allergyNote","type":["null","string"],"default": null},
 			   {"name":"preOrderDate","type":"long","logicalType":"date","default": 0},
 			   {"name":"email","type":["null","string"]},
+			   {"name":"timeZone","type":["null","string"]},
 			   {"name":"customerPhone","type":"long","default": null},
 			   {"name":"orderCountRestaurant","type":["null","long"]},
 			   {"name":"orderCountgraeshoppe","type":["null","long"]},

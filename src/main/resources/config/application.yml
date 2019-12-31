@@ -15,159 +15,157 @@
 # ===================================================================
 
 eureka:
-    client:
-        enabled: true
-        healthcheck:
-            enabled: true
-        fetch-registry: true
-        register-with-eureka: true
-        instance-info-replication-interval-seconds: 10
-        registry-fetch-interval-seconds: 10
-    instance:
-        appname: order
-        instanceId: order:${spring.application.instance-id:${random.value}}
-        lease-renewal-interval-in-seconds: 5
-        lease-expiration-duration-in-seconds: 10
-        status-page-url-path: ${management.endpoints.web.base-path}/info
-        health-check-url-path: ${management.endpoints.web.base-path}/health
-        metadata-map:
-            zone: primary # This is needed for the load balancer
-            profile: ${spring.profiles.active}
-            version: ${info.project.version:}
-            git-version: ${git.commit.id.describe:}
-            git-commit: ${git.commit.id.abbrev:}
-            git-branch: ${git.branch:}
+  client:
+    enabled: true
+    healthcheck:
+      enabled: true
+    fetch-registry: true
+    register-with-eureka: true
+    instance-info-replication-interval-seconds: 10
+    registry-fetch-interval-seconds: 10
+  instance:
+    appname: order
+    instanceId: order:${spring.application.instance-id:${random.value}}
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 10
+    status-page-url-path: ${management.endpoints.web.base-path}/info
+    health-check-url-path: ${management.endpoints.web.base-path}/health
+    metadata-map:
+      zone: primary # This is needed for the load balancer
+      profile: ${spring.profiles.active}
+      version: #project.version#
+      git-version: ${git.commit.id.describe:}
+      git-commit: ${git.commit.id.abbrev:}
+      git-branch: ${git.branch:}
 ribbon:
-    eureka:
-        enabled: true
+  eureka:
+    enabled: true
 feign:
-    hystrix:
-        enabled: false
-#    client:
-#        config:
-#            default:
-#                connectTimeout: 5000
-#                readTimeout: 5000
+  hystrix:
+    enabled: true
+  # client:
+  #     config:
+  #         default:
+  #             connectTimeout: 5000
+  #             readTimeout: 5000
 
 # See https://github.com/Netflix/Hystrix/wiki/Configuration
 hystrix:
-    command:
-        default:
-            execution:
-                isolation:
-                    strategy: SEMAPHORE
-# See https://github.com/spring-cloud/spring-cloud-netflix/issues/1330
-#                    thread:
-#                        timeoutInMilliseconds: 10000
-    shareSecurityContext: true
+  command:
+    default:
+      execution:
+        isolation:
+          strategy: SEMAPHORE
+          # See https://github.com/spring-cloud/spring-cloud-netflix/issues/1330
+          # thread:
+          #     timeoutInMilliseconds: 10000
+  shareSecurityContext: true
 
 management:
-    endpoints:
-        web:
-            base-path: /management
-            exposure:
-                include: ["configprops", "env", "health", "info", "threaddump", "logfile", "jhi-metrics", "prometheus" ]
-    endpoint:
-        health:
-            show-details: when-authorized
-        jhi-metrics:
-            enabled: true
-    info:
-        git:
-            mode: full
+  endpoints:
+    web:
+      base-path: /management
+      exposure:
+        include: ['configprops', 'env', 'health', 'info', 'jhimetrics', 'logfile', 'loggers', 'prometheus', 'threaddump']
+  endpoint:
     health:
-        mail:
-            enabled: false # When using the MailService, configure an SMTP server and set this to true
-    metrics:
-        export:
-            # Prometheus is the default metrics backend
-            prometheus:
-                enabled: true
-                step: 60
-        binders:
-            jvm:
-                enabled: true
-            processor:
-                enabled: true
-            uptime:
-                enabled: true
-            logback:
-                enabled: true
-            files:
-                enabled: true
-            integration:
-                enabled: true
-        distribution:
-            percentiles-histogram:
-                all: true
-            percentiles:
-                all: 0, 0.5, 0.75, 0.95, 0.99, 1.0
-        web:
-            server:
-                auto-time-requests: true
+      show-details: when-authorized
+      roles: 'ROLE_ADMIN'
+    jhimetrics:
+      enabled: true
+  info:
+    git:
+      mode: full
+  health:
+    mail:
+      enabled: false # When using the MailService, configure an SMTP server and set this to true
+  metrics:
+    export:
+      # Prometheus is the default metrics backend
+      prometheus:
+        enabled: true
+        step: 60
+    enable:
+      http: true
+      jvm: true
+      logback: true
+      process: true
+      system: true
+    distribution:
+      percentiles-histogram:
+        all: true
+      percentiles:
+        all: 0, 0.5, 0.75, 0.95, 0.99, 1.0
+    tags:
+      application: ${spring.application.name}
+    web:
+      server:
+        auto-time-requests: true
 
 spring:
-    autoconfigure:
-        exclude: org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration,org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchAutoConfiguration,org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
-    application:
-        name: order
+  autoconfigure:
+    exclude: org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration,org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchAutoConfiguration,org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
+  application:
+    name: order
+  jmx:
+    enabled: false
+  data:
     jpa:
-        open-in-view: false
-        properties:
-            hibernate.jdbc.time_zone: UTC
-        hibernate:
-            ddl-auto: none
-            naming:
-                physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-                implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
-    messages:
-        basename: i18n/messages
-    mvc:
-        favicon:
-            enabled: false
-    thymeleaf:
-        mode: HTML
-
-# ===================================================================
-# OpenID Connect Settings. Default settings are for Keycloak in Docker.
-# Start Keycloak using `docker-compose -f src/main/docker/keycloak.yml up`.
-#
-# To use Okta, your settings should resemble the following:
-#
-# accessTokenUri: https://{yourOktaDomain}.com/oauth2/default/v1/token
-# userAuthorizationUri: https://{yourOktaDomain}.com/oauth2/default/v1/authorize
-# clientId: {copy after creating an OIDC app}
-# clientSecret: {copy after creating an OIDC app}
-# userInfoUri: https://{yourOktaDomain}.com/oauth2/default/v1/userinfo
-# tokenInfoUri: https://{yourOktaDomain}.com/oauth2/default/v1/introspect
-#
-# You can also override these properties using environment variables.
-# For example:
-#
-# export SECURITY_OAUTH2_CLIENT_CLIENT_ID="jhipster"
-# export SECURITY_OAUTH2_CLIENT_CLIENT_SECRET="38561a05"
-# ===================================================================
-security:
-  oauth2:
-    client:
-      access-token-uri: https://dev.servers.divisosofttech.com/auth/realms/graeshoppe/protocol/openid-connect/token
-      user-authorization-uri: https://dev.servers.divisosofttech.com/auth/realms/graeshoppe/protocol/openid-connect/auth
-      client-id: account
-      client-secret: d4f03412-cdad-45b0-9ccc-beddd8399ac5
-      scope: openid profile email
-    resource:
-      user-info-uri: https://dev.servers.divisosofttech.com/auth/realms/graeshoppe/protocol/openid-connect/userinfo
+      repositories:
+        bootstrap-mode: deferred
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate.jdbc.time_zone: UTC
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+  messages:
+    basename: i18n/messages
+  main:
+    allow-bean-definition-overriding: true
+  mvc:
+    favicon:
+      enabled: false
+  task:
+    execution:
+      thread-name-prefix: order-task-
+      pool:
+        core-size: 2
+        max-size: 50
+        queue-capacity: 10000
+    scheduling:
+      thread-name-prefix: order-scheduling-
+      pool:
+        size: 2
+  thymeleaf:
+    mode: HTML
+  output:
+    ansi:
+      console-available: true
+  security:
+    oauth2:
+      client:
+        provider:
+          oidc:
+            issuer-uri: https://dev.servers.divisosofttech.com/auth/realms/graeshoppe
+        registration:
+          oidc:
+            client-id: internal
+            client-secret: d4f03412-cdad-45b0-9ccc-beddd8399ac5
 
 server:
-    servlet:
-        session:
-            cookie:
-                http-only: true
+  servlet:
+    session:
+      cookie:
+        http-only: true
 
 # Properties to be exposed on the /info management endpoint
 info:
-    # Comma separated list of profiles that will trigger the ribbon to show
-    display-ribbon-on-profiles: "dev"
+  # Comma separated list of profiles that will trigger the ribbon to show
+  display-ribbon-on-profiles: 'dev'
 
 # ===================================================================
 # JHipster specific properties
@@ -176,32 +174,46 @@ info:
 # ===================================================================
 
 jhipster:
-    async:
-        core-pool-size: 2
-        max-pool-size: 50
-        queue-capacity: 10000
-    # By default CORS is disabled. Uncomment to enable.
-    #cors:
-        #allowed-origins: "*"
-        #allowed-methods: "*"
-        #allowed-headers: "*"
-        #exposed-headers: "Authorization,Link,X-Total-Count"
-        #allow-credentials: true
-        #max-age: 1800
-    mail:
-        from: order@localhost
-    swagger:
-        default-include-pattern: /api/.*
-        title: order API
-        description: order API documentation
-        version: 0.0.1
-        terms-of-service-url:
-        contact-name:
-        contact-url:
-        contact-email:
-        license:
-        license-url:
-
+  clientApp:
+    name: 'orderApp'
+  # By default CORS is disabled. Uncomment to enable.
+  # cors:
+  #     allowed-origins: "*"
+  #     allowed-methods: "*"
+  #     allowed-headers: "*"
+  #     exposed-headers: "Authorization,Link,X-Total-Count"
+  #     allow-credentials: true
+  #     max-age: 1800
+  mail:
+    from: order@localhost
+  swagger:
+    default-include-pattern: /api/.*
+    title: order API
+    description: order API documentation
+    version: 0.0.1
+    terms-of-service-url:
+    contact-name:
+    contact-url:
+    contact-email:
+    license:
+    license-url:
+  security:
+    oauth2:
+      audience:
+        - account
+        - api://default
+kafka:
+  bootstrap-servers: dev.servers.divisosofttech.com:9092
+  consumer:
+    key.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+    value.deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+    bootstrap.servers: dev.servers.divisosofttech.com:9092
+    group.id: customerappgateway
+    auto.offset.reset: earliest
+    schema.registry.url: http://dev.servers.divisosofttech.com:8081
+  producer:
+    key.serializer: org.apache.kafka.common.serialization.StringSerializer
+    value.serializer: com.diviso.graeshoppe.order.config.SerdeConfig
 # ===================================================================
 # Application specific properties
 # Add your own application properties here, see the ApplicationProperties class
@@ -211,10 +223,16 @@ jhipster:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-#application:
+# application:
 app:
    orderId-prefix: FEXP-
-
+topic:
+   payment:
+      destination: payment
+   order:
+      destination: order
+   notification:
+      destination: notificationx
 bpmn:
    url: http://dev.servers.divisosofttech.com/activiti-rest/service
    processId: process:21:36433 #process:1:43 #process:4:78797 #process:2:42632 #process:1:10004
@@ -222,4 +240,3 @@ bpmn:
       basicAuth:
          username: kermit
          password: kermit
-         

@@ -3,7 +3,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * A DTO for the Offer entity.
+ * A DTO for the {@link com.diviso.graeshoppe.order.domain.Offer} entity.
  */
 public class OfferDTO implements Serializable {
 
@@ -86,7 +86,7 @@ public class OfferDTO implements Serializable {
             ", offerRef='" + getOfferRef() + "'" +
             ", orderDiscountAmount=" + getOrderDiscountAmount() +
             ", description='" + getDescription() + "'" +
-            ", order=" + getOrderId() +
+            ", orderId=" + getOrderId() +
             "}";
     }
 }

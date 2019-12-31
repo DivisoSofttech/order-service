@@ -19,7 +19,7 @@ import java.util.Optional;
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
- * Service Implementation for managing Offer.
+ * Service Implementation for managing {@link Offer}.
  */
 @Service
 @Transactional
@@ -42,8 +42,8 @@ public class OfferServiceImpl implements OfferService {
     /**
      * Save a offer.
      *
-     * @param offerDTO the entity to save
-     * @return the persisted entity
+     * @param offerDTO the entity to save.
+     * @return the persisted entity.
      */
     @Override
     public OfferDTO save(OfferDTO offerDTO) {
@@ -58,8 +58,8 @@ public class OfferServiceImpl implements OfferService {
     /**
      * Get all the offers.
      *
-     * @param pageable the pagination information
-     * @return the list of entities
+     * @param pageable the pagination information.
+     * @return the list of entities.
      */
     @Override
     @Transactional(readOnly = true)
@@ -73,8 +73,8 @@ public class OfferServiceImpl implements OfferService {
     /**
      * Get one offer by id.
      *
-     * @param id the id of the entity
-     * @return the entity
+     * @param id the id of the entity.
+     * @return the entity.
      */
     @Override
     @Transactional(readOnly = true)
@@ -87,7 +87,7 @@ public class OfferServiceImpl implements OfferService {
     /**
      * Delete the offer by id.
      *
-     * @param id the id of the entity
+     * @param id the id of the entity.
      */
     @Override
     public void delete(Long id) {
@@ -99,9 +99,9 @@ public class OfferServiceImpl implements OfferService {
     /**
      * Search for the offer corresponding to the query.
      *
-     * @param query the query of the search
-     * @param pageable the pagination information
-     * @return the list of entities
+     * @param query the query of the search.
+     * @param pageable the pagination information.
+     * @return the list of entities.
      */
     @Override
     @Transactional(readOnly = true)

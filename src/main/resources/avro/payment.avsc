@@ -1,6 +1,6 @@
 
   {
-	"namespace":"com.diviso.graeshoppe.payment.avro",
+	"namespace":"com.diviso.graeshoppe.order.avro",
 	"name":"Payment",
 	"type":"record",
 	"fields":[
