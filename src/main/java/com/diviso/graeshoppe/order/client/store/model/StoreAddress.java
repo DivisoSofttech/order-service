@@ -40,7 +40,7 @@ public class StoreAddress   {
   private Long phone = null;
 
   @JsonProperty("pincode")
-  private Long pincode = null;
+  private String pincode = null;
 
   @JsonProperty("roadNameAreaOrStreet")
   private String roadNameAreaOrStreet = null;
@@ -228,7 +228,7 @@ public class StoreAddress   {
     this.phone = phone;
   }
 
-  public StoreAddress pincode(Long pincode) {
+  public StoreAddress pincode(String pincode) {
     this.pincode = pincode;
     return this;
   }
@@ -240,11 +240,11 @@ public class StoreAddress   {
   @ApiModelProperty(value = "")
 
 
-  public Long getPincode() {
+  public String getPincode() {
     return pincode;
   }
 
-  public void setPincode(Long pincode) {
+  public void setPincode(String pincode) {
     this.pincode = pincode;
   }
 
