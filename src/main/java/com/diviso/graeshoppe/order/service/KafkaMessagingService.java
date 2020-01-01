@@ -78,6 +78,7 @@ public class KafkaMessagingService {
 					records.forEach(record -> {
 						log.info("Record payment consumed is " + record.value());
 						Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(record.value().getTargetId());
+						System.out.println("Value findByOrderId "+ orderDTO.get());
 						if(orderDTO.isPresent()) {
 							orderDTO.get().setPaymentMode(record.value().getPaymentType().toUpperCase());
 							orderDTO.get().setPaymentRef(record.value().getId().toString());
