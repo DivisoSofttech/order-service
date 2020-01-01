@@ -39,8 +39,7 @@ public class KafkaMessagingService {
 
 	@Autowired
 	private OrderCommandService orderCommandService;
-	
-	
+
 	@Value("${topic.notification.destination}")
 	private String notificationTopic;
 	private final KafkaProperties kafkaProperties;
@@ -74,34 +73,20 @@ public class KafkaMessagingService {
 			consumer.subscribe(Collections.singletonList(paymentTopic));
 			boolean exitLoop = false;
 			while (!exitLoop) {
-				System.out.println("Loop condition "+!exitLoop);
 				try {
 					ConsumerRecords<String, Payment> records = consumer.poll(Duration.ofSeconds(3));
-					
-					for(ConsumerRecord<String, Payment> record: records) {
-						log.info("Record payment consumed is " + record.value());
-						test(record.value());
-						/*
-						 * Optional<OrderDTO> orderDTO =
-						 * orderCommandService.findByOrderID(record.value().getTargetId());
-						 * System.out.println("Order present or not "+orderDTO.isPresent());
-						 */
-					}
-					
-					/*records.forEach(record -> {
-						log.info("Record payment consumed is " + record.value());
-						
 
-					});*/
+					for (ConsumerRecord<String, Payment> record : records) {
+						log.info("Record payment consumed is " + record.value());
+						updateOrder(record.value());
+					}
 				} catch (Exception ex) {
 					log.trace("Complete with error {}", ex.getMessage(), ex);
 					exitLoop = true;
 					ex.printStackTrace();
-					System.out.println("in catch set exitloop to "+exitLoop);
-
 				}
 			}
-			System.out.println("Out of the loop Consumer is going to close"+!exitLoop);
+			System.out.println("Out of the loop Consumer is going to close" + !exitLoop);
 			consumer.close();
 		});
 
@@ -121,19 +106,18 @@ public class KafkaMessagingService {
 			this.timestamp = timestamp;
 		}
 	}
-	
-	public void test(Payment payment) {
-		System.out.println("This is a test method"+payment);
-		/*
-		 * Optional<OrderDTO> orderDTO =
-		 * orderCommandService.findByOrderID(payment.getTargetId()); if
-		 * (orderDTO.isPresent()) {
-		 * orderDTO.get().setPaymentMode(payment.getPaymentType().toUpperCase());
-		 * orderDTO.get().setPaymentRef(payment.getId().toString()); // in order to set
-		 * the status need to check the order flow if advanced flow this // works
-		 * orderDTO.get().setStatusId(6l); // payment-processed-unapproved
-		 * orderCommandService.update(orderDTO.get());
-		 * log.info("Order updated with payment ref"); }
-		 */
+
+	public void updateOrder(Payment payment) {
+
+		Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(payment.getTargetId());
+		if (orderDTO.isPresent()) {
+			orderDTO.get().setPaymentMode(payment.getPaymentType().toUpperCase());
+			orderDTO.get().setPaymentRef(payment.getId().toString()); // in order to set the status need to check the
+																		// order flow if advanced flow this // works
+			orderDTO.get().setStatusId(6l); // payment-processed-unapproved
+			orderCommandService.update(orderDTO.get());
+			log.info("Order updated with payment ref");
+		}
+
 	}
 }
