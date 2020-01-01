@@ -119,16 +119,17 @@ public class KafkaMessagingService {
 	}
 	
 	public void test(Payment payment) {
-		System.out.println("This is a test method");
-		Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(payment.getTargetId());
-		if (orderDTO.isPresent()) {
-			orderDTO.get().setPaymentMode(payment.getPaymentType().toUpperCase());
-			orderDTO.get().setPaymentRef(payment.getId().toString());
-			// in order to set the status need to check the order flow if advanced flow this
-			// works
-			orderDTO.get().setStatusId(6l); // payment-processed-unapproved
-			orderCommandService.update(orderDTO.get());
-			log.info("Order updated with payment ref");
-		}
+		System.out.println("This is a test method"+payment);
+		/*
+		 * Optional<OrderDTO> orderDTO =
+		 * orderCommandService.findByOrderID(payment.getTargetId()); if
+		 * (orderDTO.isPresent()) {
+		 * orderDTO.get().setPaymentMode(payment.getPaymentType().toUpperCase());
+		 * orderDTO.get().setPaymentRef(payment.getId().toString()); // in order to set
+		 * the status need to check the order flow if advanced flow this // works
+		 * orderDTO.get().setStatusId(6l); // payment-processed-unapproved
+		 * orderCommandService.update(orderDTO.get());
+		 * log.info("Order updated with payment ref"); }
+		 */
 	}
 }
