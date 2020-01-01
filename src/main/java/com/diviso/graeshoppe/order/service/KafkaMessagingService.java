@@ -96,6 +96,7 @@ public class KafkaMessagingService {
 				} catch (Exception ex) {
 					log.trace("Complete with error {}", ex.getMessage(), ex);
 					exitLoop = true;
+					ex.printStackTrace();
 					System.out.println("in catch set exitloop to "+exitLoop);
 
 				}
