@@ -75,7 +75,7 @@ public class KafkaMessagingService {
 
 		Thread consumerThread = new Thread(() -> {
 			try {
-				paymentConsumer.subscribe(Collections.singletonList(paymentTopic));
+				paymentConsumer.subscribe(Collections.singletonList("payment"));
 				log.info("Kafka consumer started");
 				while (!closed.get()) {
 					ConsumerRecords<String, Payment> records = paymentConsumer.poll(Duration.ofSeconds(3));
