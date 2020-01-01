@@ -2,7 +2,7 @@ package com.diviso.graeshoppe.order.service;
 
 import com.diviso.graeshoppe.notification.avro.Notification;
 import com.diviso.graeshoppe.order.avro.Order;
-import com.diviso.graeshoppe.order.avro.Payment;
+import com.diviso.graeshoppe.payment.avro.Payment;
 
 import com.diviso.graeshoppe.order.config.KafkaProperties;
 import com.diviso.graeshoppe.order.service.dto.OrderDTO;
