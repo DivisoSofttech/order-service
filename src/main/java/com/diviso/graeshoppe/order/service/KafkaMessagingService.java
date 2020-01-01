@@ -7,6 +7,7 @@ import com.diviso.graeshoppe.order.avro.Payment;
 import com.diviso.graeshoppe.order.config.KafkaProperties;
 import com.diviso.graeshoppe.order.service.dto.OrderDTO;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -71,9 +72,17 @@ public class KafkaMessagingService {
 			consumer.subscribe(Collections.singletonList(paymentTopic));
 			boolean exitLoop = false;
 			while (!exitLoop) {
+				System.out.println("Loop condition "+!exitLoop);
 				try {
 					ConsumerRecords<String, Payment> records = consumer.poll(Duration.ofSeconds(3));
-					records.forEach(record -> {
+					
+					for(ConsumerRecord<String, Payment> record: records) {
+						log.info("Record payment consumed is " + record.value());
+						Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(record.value().getTargetId());
+						System.out.println("Order present or not "+orderDTO.isPresent());
+					}
+					
+					/*records.forEach(record -> {
 						log.info("Record payment consumed is " + record.value());
 						Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(record.value().getTargetId());
 						if (orderDTO.isPresent()) {
@@ -86,12 +95,13 @@ public class KafkaMessagingService {
 							log.info("Order updated with payment ref");
 						}
 
-					});
+					});*/
 				} catch (Exception ex) {
 					log.trace("Complete with error {}", ex.getMessage(), ex);
 					exitLoop = true;
 				}
 			}
+			System.out.println("Out of the loop Consumer is going to close");
 			consumer.close();
 		});
 
