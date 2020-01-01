@@ -12,6 +12,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.errors.WakeupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 public class KafkaMessagingService {
@@ -43,13 +45,15 @@ public class KafkaMessagingService {
 	private final KafkaProperties kafkaProperties;
 	private KafkaProducer<String, Order> orderProducer;
 	private KafkaProducer<String, Notification> notificatonProducer;
-	private ExecutorService sseExecutorService = Executors.newCachedThreadPool();
+	KafkaConsumer<String, Payment> paymentConsumer ;
+	//private ExecutorService sseExecutorService = Executors.newCachedThreadPool();
+	private final AtomicBoolean closed = new AtomicBoolean(false);
 
 	public KafkaMessagingService(KafkaProperties kafkaProperties) {
 		this.kafkaProperties = kafkaProperties;
 		this.orderProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
 		this.notificatonProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
-		this.subscribePayment();
+		this.start();
 	}
 
 	public PublishResult publishOrder(Order message) throws ExecutionException, InterruptedException {
@@ -64,17 +68,17 @@ public class KafkaMessagingService {
 				Instant.ofEpochMilli(metadata.timestamp()));
 	}
 
-	public void subscribePayment() {
+	public void start() {
+		log.info("Kafka consumer starting notification...");
+		this.paymentConsumer = new KafkaConsumer<>(kafkaProperties.getConsumerProps());
+		Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
 
-		Map<String, Object> consumerProps = kafkaProperties.getConsumerProps();
-		log.info("Kafka consumer starting Payment...");
 		Thread consumerThread = new Thread(() -> {
-			KafkaConsumer<String, Payment> consumer = new KafkaConsumer<>(consumerProps);
-			consumer.subscribe(Collections.singletonList(paymentTopic));
-			boolean exitLoop = false;
-			while (!exitLoop) {
-				try {
-					ConsumerRecords<String, Payment> records = consumer.poll(Duration.ofSeconds(3));
+			try {
+				paymentConsumer.subscribe(Collections.singletonList(paymentTopic));
+				log.info("Kafka consumer started");
+				while (!closed.get()) {
+					ConsumerRecords<String, Payment> records = paymentConsumer.poll(Duration.ofSeconds(3));
 					records.forEach(record -> {
 						log.info("Record payment consumed is $$$ " + record.value());
 						System.out.println("++++++++++++++++++++++++++++++++++++++++++");
@@ -89,19 +93,54 @@ public class KafkaMessagingService {
 							orderCommandService.update(orderDTO.get());
 							log.info("Order updated with payment ref");
 						}
-						
 					});
-				} catch (Exception ex) {
-					log.trace("Complete with error {}", ex.getMessage(), ex);
-					exitLoop = true;
 				}
+				paymentConsumer.commitSync();
+			} catch (WakeupException e) {
+				if (!closed.get())
+					throw e;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			} finally {
+				paymentConsumer.close();
 			}
-			consumer.close();
 		});
-		
 		consumerThread.start();
 	}
-
+	
+	/*
+	 * public void subscribePayment() {
+	 * 
+	 * Map<String, Object> consumerProps = kafkaProperties.getConsumerProps();
+	 * log.info("Kafka consumer starting Payment..."); Thread consumerThread = new
+	 * Thread(() -> { consumer.subscribe(Collections.singletonList(paymentTopic));
+	 * boolean exitLoop = false; while (!exitLoop) { try { ConsumerRecords<String,
+	 * Payment> records = consumer.poll(Duration.ofSeconds(3));
+	 * records.forEach(record -> { log.info("Record payment consumed is $$$ " +
+	 * record.value());
+	 * System.out.println("++++++++++++++++++++++++++++++++++++++++++");
+	 * Optional<OrderDTO> orderDTO =
+	 * orderCommandService.findByOrderID(record.value().getTargetId());
+	 * System.out.println("++++++++++++++++++++++++++++++++++++++");
+	 * System.out.println("Value findByOrderId "+ orderDTO.get());
+	 * if(orderDTO.isPresent()) {
+	 * orderDTO.get().setPaymentMode(record.value().getPaymentType().toUpperCase());
+	 * orderDTO.get().setPaymentRef(record.value().getId().toString()); // in order
+	 * to set the status need to check the order flow if advanced flow this works
+	 * orderDTO.get().setStatusId(6l); //payment-processed-unapproved
+	 * orderCommandService.update(orderDTO.get());
+	 * log.info("Order updated with payment ref"); }
+	 * 
+	 * }); } catch (Exception ex) { log.trace("Complete with error {}",
+	 * ex.getMessage(), ex); exitLoop = true; } } consumer.close(); });
+	 * 
+	 * consumerThread.start(); }
+	 */
+	public void shutdown() {
+		log.info("Shutdown Kafka consumer");
+		closed.set(true);
+		paymentConsumer.wakeup();
+	}
 	public static class PublishResult {
 		public final String topic;
 		public final int partition;
