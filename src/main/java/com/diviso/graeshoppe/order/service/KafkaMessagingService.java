@@ -80,7 +80,7 @@ public class KafkaMessagingService {
 					
 					for(ConsumerRecord<String, Payment> record: records) {
 						log.info("Record payment consumed is " + record.value());
-						test();
+						test(record.value());
 						/*
 						 * Optional<OrderDTO> orderDTO =
 						 * orderCommandService.findByOrderID(record.value().getTargetId());
@@ -90,16 +90,7 @@ public class KafkaMessagingService {
 					
 					/*records.forEach(record -> {
 						log.info("Record payment consumed is " + record.value());
-						Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(record.value().getTargetId());
-						if (orderDTO.isPresent()) {
-							orderDTO.get().setPaymentMode(record.value().getPaymentType().toUpperCase());
-							orderDTO.get().setPaymentRef(record.value().getId().toString());
-							// in order to set the status need to check the order flow if advanced flow this
-							// works
-							orderDTO.get().setStatusId(6l); // payment-processed-unapproved
-							orderCommandService.update(orderDTO.get());
-							log.info("Order updated with payment ref");
-						}
+						
 
 					});*/
 				} catch (Exception ex) {
@@ -127,7 +118,17 @@ public class KafkaMessagingService {
 		}
 	}
 	
-	public void test() {
+	public void test(Payment payment) {
 		System.out.println("This is a test method");
+		Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(payment.getTargetId());
+		if (orderDTO.isPresent()) {
+			orderDTO.get().setPaymentMode(payment.getPaymentType().toUpperCase());
+			orderDTO.get().setPaymentRef(payment.getId().toString());
+			// in order to set the status need to check the order flow if advanced flow this
+			// works
+			orderDTO.get().setStatusId(6l); // payment-processed-unapproved
+			orderCommandService.update(orderDTO.get());
+			log.info("Order updated with payment ref");
+		}
 	}
 }
