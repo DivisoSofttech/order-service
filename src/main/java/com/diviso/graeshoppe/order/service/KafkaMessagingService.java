@@ -76,7 +76,7 @@ public class KafkaMessagingService {
 				try {
 					ConsumerRecords<String, Payment> records = consumer.poll(Duration.ofSeconds(3));
 					records.forEach(record -> {
-						log.info("Record payment consumed is " + record.value());
+						log.info("Record payment consumed is $$$ " + record.value());
 						System.out.println("++++++++++++++++++++++++++++++++++++++++++");
 						Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(record.value().getTargetId());
 						System.out.println("++++++++++++++++++++++++++++++++++++++");
