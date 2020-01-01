@@ -28,7 +28,6 @@ public class KafkaProperties {
 
     public Map<String, Object> getConsumerProps() {
         Map<String, Object> properties = new HashMap<>(this.consumer);
-        properties.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
         if (!properties.containsKey("bootstrap.servers")) {
             properties.put("bootstrap.servers", this.bootStrapServers);
         }

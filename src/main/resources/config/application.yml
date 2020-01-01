@@ -208,6 +208,7 @@ kafka:
     value.deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
     bootstrap.servers: dev.servers.divisosofttech.com:9092
     group.id: ordergroup
+    specific.avro.reader: true
     auto.offset.reset: earliest
     schema.registry.url: http://dev.servers.divisosofttech.com:8081
   producer:
