@@ -39,6 +39,8 @@ public class KafkaMessagingService {
 
 	@Autowired
 	private OrderCommandService orderCommandService;
+	
+	
 	@Value("${topic.notification.destination}")
 	private String notificationTopic;
 	private final KafkaProperties kafkaProperties;
@@ -78,6 +80,7 @@ public class KafkaMessagingService {
 					
 					for(ConsumerRecord<String, Payment> record: records) {
 						log.info("Record payment consumed is " + record.value());
+						test();
 						/*
 						 * Optional<OrderDTO> orderDTO =
 						 * orderCommandService.findByOrderID(record.value().getTargetId());
@@ -122,5 +125,9 @@ public class KafkaMessagingService {
 			this.offset = offset;
 			this.timestamp = timestamp;
 		}
+	}
+	
+	public void test() {
+		System.out.println("This is a test method");
 	}
 }
