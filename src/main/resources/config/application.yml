@@ -206,7 +206,7 @@ kafka:
   bootstrap-servers: dev.servers.divisosofttech.com:9092
   consumer:
     key.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
-    value.deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+    value.deserializer: com.diviso.graeshoppe.order.config.SerdeConfig #io.confluent.kafka.serializers.KafkaAvroDeserializer
     bootstrap.servers: dev.servers.divisosofttech.com:9092
     group.id: ordergroup
     auto.offset.reset: earliest

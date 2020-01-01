@@ -92,7 +92,7 @@ public class KafkaMessagingService {
 					exitLoop = true;
 				}
 			}
-			// consumer.close();
+			consumer.close();
 		});
 
 	}
