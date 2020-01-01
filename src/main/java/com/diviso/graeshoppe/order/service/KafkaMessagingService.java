@@ -69,7 +69,7 @@ public class KafkaMessagingService {
 
 	public void subscribePayment() {
 		Map<String, Object> consumerProps = kafkaProperties.getConsumerProps();
-		sseExecutorService.execute(() -> {
+		Thread paymentThread = new Thread(() -> {
 			KafkaConsumer<String, Payment> consumer = new KafkaConsumer<>(consumerProps);
 			consumer.subscribe(Collections.singletonList(paymentTopic));
 			boolean exitLoop = false;
@@ -102,6 +102,7 @@ public class KafkaMessagingService {
 			consumer.close();
 		});
 
+		paymentThread.start();
 	}
 
 	public static class PublishResult {
