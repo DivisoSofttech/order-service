@@ -116,7 +116,7 @@ public class KafkaMessagingService {
 																		// order flow if advanced flow this // works
 			orderDTO.get().setStatusId(6l); // payment-processed-unapproved
 			orderCommandService.update(orderDTO.get());
-			log.info("Order updated with payment ref");
+			log.info("Order updated with payment ref"+ payment.getTargetId());
 		}
 
 	}
