@@ -78,8 +78,16 @@ public class KafkaMessagingService {
 
 					for (ConsumerRecord<String, Payment> record : records) {
 						log.info("Record payment consumed is " + record.value());
-						updateOrder(record.value());
-					}
+						Payment payment = record.value();
+						Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(payment.getTargetId());
+						if (orderDTO.isPresent()) {
+							orderDTO.get().setPaymentMode(payment.getPaymentType().toUpperCase());
+							orderDTO.get().setPaymentRef(payment.getId().toString()); // in order to set the status need to check the
+																						// order flow if advanced flow this // works
+							orderDTO.get().setStatusId(6l); // payment-processed-unapproved
+							orderCommandService.update(orderDTO.get());
+							log.info("Order updated with payment ref"+ payment.getTargetId());
+						}					}
 				} catch (Exception ex) {
 					log.trace("Complete with error {}", ex.getMessage(), ex);
 					exitLoop = true;
@@ -107,17 +115,9 @@ public class KafkaMessagingService {
 		}
 	}
 
-	public void updateOrder(Payment payment) {
+	//public void updateOrder(Payment payment) {
 
-		Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(payment.getTargetId());
-		if (orderDTO.isPresent()) {
-			orderDTO.get().setPaymentMode(payment.getPaymentType().toUpperCase());
-			orderDTO.get().setPaymentRef(payment.getId().toString()); // in order to set the status need to check the
-																		// order flow if advanced flow this // works
-			orderDTO.get().setStatusId(6l); // payment-processed-unapproved
-			orderCommandService.update(orderDTO.get());
-			log.info("Order updated with payment ref"+ payment.getTargetId());
-		}
+		
 
-	}
+	//}
 }
