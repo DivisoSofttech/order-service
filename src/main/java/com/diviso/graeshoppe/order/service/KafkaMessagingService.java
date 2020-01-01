@@ -87,6 +87,7 @@ public class KafkaMessagingService {
 							orderDTO.get().setStatusId(6l); // payment-processed-unapproved
 							orderCommandService.update(orderDTO.get());
 							log.info("Order updated with payment ref"+ payment.getTargetId());
+							orderCommandService.publishMesssage(payment.getTargetId());
 						}					}
 				} catch (Exception ex) {
 					log.trace("Complete with error {}", ex.getMessage(), ex);
