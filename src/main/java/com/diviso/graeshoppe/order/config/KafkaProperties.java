@@ -3,6 +3,8 @@ package com.diviso.graeshoppe.order.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +28,7 @@ public class KafkaProperties {
 
     public Map<String, Object> getConsumerProps() {
         Map<String, Object> properties = new HashMap<>(this.consumer);
+        properties.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
         if (!properties.containsKey("bootstrap.servers")) {
             properties.put("bootstrap.servers", this.bootStrapServers);
         }
