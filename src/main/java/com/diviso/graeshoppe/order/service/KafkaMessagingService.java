@@ -78,8 +78,11 @@ public class KafkaMessagingService {
 					
 					for(ConsumerRecord<String, Payment> record: records) {
 						log.info("Record payment consumed is " + record.value());
-						Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(record.value().getTargetId());
-						System.out.println("Order present or not "+orderDTO.isPresent());
+						/*
+						 * Optional<OrderDTO> orderDTO =
+						 * orderCommandService.findByOrderID(record.value().getTargetId());
+						 * System.out.println("Order present or not "+orderDTO.isPresent());
+						 */
 					}
 					
 					/*records.forEach(record -> {
@@ -101,7 +104,7 @@ public class KafkaMessagingService {
 					exitLoop = true;
 				}
 			}
-			System.out.println("Out of the loop Consumer is going to close");
+			System.out.println("Out of the loop Consumer is going to close"+!exitLoop);
 			consumer.close();
 		});
 
