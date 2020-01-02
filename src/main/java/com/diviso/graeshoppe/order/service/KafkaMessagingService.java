@@ -76,7 +76,7 @@ public class KafkaMessagingService {
 				try {
 					ConsumerRecords<String, Payment> records = consumer.poll(Duration.ofSeconds(3));
 
-					for (ConsumerRecord<String, Payment> record : records) {
+					records.forEach(record->{
 						log.info("Record payment consumed is " + record.value());
 						Payment payment = record.value();
 						Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(payment.getTargetId());
@@ -88,7 +88,10 @@ public class KafkaMessagingService {
 							orderCommandService.update(orderDTO.get());
 							log.info("Order updated with payment ref"+ payment.getTargetId());
 							//orderCommandService.publishMesssage(payment.getTargetId());
-						}					}
+						}	
+					});
+						
+						
 				} catch (Exception ex) {
 					log.trace("Complete with error {}", ex.getMessage(), ex);
 					exitLoop = true;
