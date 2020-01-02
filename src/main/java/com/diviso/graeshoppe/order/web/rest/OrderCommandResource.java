@@ -1,4 +1,5 @@
 package com.diviso.graeshoppe.order.web.rest;
+import com.diviso.graeshoppe.order.client.customer.api.CustomerResourceApi;
 import com.diviso.graeshoppe.order.resource.assembler.CommandResource;
 import com.diviso.graeshoppe.order.service.OrderCommandService;
 import com.diviso.graeshoppe.order.web.rest.errors.BadRequestAlertException;
@@ -8,6 +9,7 @@ import com.diviso.graeshoppe.order.service.dto.OrderDTO;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +37,9 @@ public class OrderCommandResource {
     private static final String ENTITY_NAME = "orderOrder";
 
     private final OrderCommandService orderService;
+    
+    @Autowired
+    private CustomerResourceApi customerResource;
     
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
@@ -141,6 +146,12 @@ public class OrderCommandResource {
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
+    
+    @GetMapping("/findcustomer/{ref}")
+    public void test(@PathVariable String ref) {
+    	System.out.println(customerResource.findByReferenceUsingGET(ref));
+    }
+    
    @PostMapping("/pulishMessage/{orderId}")
     public void publishOrderToMessagebroker(@PathVariable String orderId) {
 	   //orderService.publishMesssage(orderId);
