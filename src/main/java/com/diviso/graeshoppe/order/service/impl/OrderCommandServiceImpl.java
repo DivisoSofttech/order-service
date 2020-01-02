@@ -271,7 +271,25 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
 	@Override
 	public void publishMesssage(String orderId) {
-		Order order = orderRepository.findByOrderIdAndStatus_Name(orderId, "payment-processed-unapproved").get();
+		boolean isOrderUpdated = false;
+
+		Order order = null;
+		while(!isOrderUpdated) {
+			System.out.println("Inside loop");
+			Optional<Order> orderOp = orderRepository.findByOrderIdAndStatus_Name(orderId, "payment-processed-unapproved");
+			if(orderOp.isPresent()) {
+				System.out.println("Order is found");
+				isOrderUpdated = true;
+				order = orderOp.get();
+			} else {
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 
 		Customer customer = customerResourceApi.findByReferenceUsingGET(order.getCustomerId()).getBody();
 		Long phone = customer.getContact().getMobileNumber();
@@ -369,6 +387,8 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 			log.error("Error sending avro message " + e.getMessage());
 
 		}
+		
+		
 	}
 
 	private com.diviso.graeshoppe.order.avro.OrderLine toAvroOrderLine(OrderLine orderline) {
