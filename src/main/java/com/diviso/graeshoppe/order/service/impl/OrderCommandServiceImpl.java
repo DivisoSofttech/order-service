@@ -271,15 +271,16 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
 	@Override
 	public void publishMesssage(String orderId) {
-		boolean isOrderUpdated = false;
+		boolean isOrderNotUpdated = true;
 
 		Order order = null;
-		while(!isOrderUpdated) {
+		while(isOrderNotUpdated) {
 			System.out.println("Inside loop");
 			Optional<Order> orderOp = orderRepository.findByOrderIdAndStatus_Name(orderId, "payment-processed-unapproved");
+			System.out.println("Order is orderop "+orderOp);
 			if(orderOp.isPresent()) {
 				System.out.println("Order is found");
-				isOrderUpdated = true;
+				isOrderNotUpdated = false;
 				order = orderOp.get();
 			} else {
 				try {
