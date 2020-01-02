@@ -154,7 +154,7 @@ public class OrderCommandResource {
     
    @PostMapping("/pulishMessage/{orderId}")
     public void publishOrderToMessagebroker(@PathVariable String orderId) {
-	   //orderService.publishMesssage(orderId);
+	   orderService.publishMesssage(orderId);
     }
    
 }

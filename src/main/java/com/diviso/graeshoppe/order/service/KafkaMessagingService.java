@@ -68,7 +68,7 @@ public class KafkaMessagingService {
 
 	public void subscribePayment() {
 		Map<String, Object> consumerProps = kafkaProperties.getConsumerProps();
-		Thread paymentThread = new Thread(() -> {
+		sseExecutorService.execute(() -> {
 			KafkaConsumer<String, Payment> consumer = new KafkaConsumer<>(consumerProps);
 			consumer.subscribe(Collections.singletonList(paymentTopic));
 			boolean exitLoop = false;
@@ -87,7 +87,7 @@ public class KafkaMessagingService {
 							orderDTO.get().setStatusId(6l); // payment-processed-unapproved
 							orderCommandService.update(orderDTO.get());
 							log.info("Order updated with payment ref"+ payment.getTargetId());
-							orderCommandService.publishMesssage(payment.getTargetId());
+							//orderCommandService.publishMesssage(payment.getTargetId());
 						}					}
 				} catch (Exception ex) {
 					log.trace("Complete with error {}", ex.getMessage(), ex);
@@ -99,7 +99,7 @@ public class KafkaMessagingService {
 			consumer.close();
 		});
 
-		paymentThread.start();
+		//paymentThread.start();
 	}
 
 	public static class PublishResult {
