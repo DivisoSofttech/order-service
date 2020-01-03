@@ -5,6 +5,7 @@ import com.diviso.graeshoppe.order.service.KafkaMessagingService;
 import com.diviso.graeshoppe.order.service.NotificationCommandService;
 import com.diviso.graeshoppe.order.service.OrderCommandService;
 import com.diviso.graeshoppe.order.avro.ApprovalInfo;
+import com.diviso.graeshoppe.order.avro.ApprovalInfo.Builder;
 import com.diviso.graeshoppe.order.client.bpmn.api.FormsApi;
 import com.diviso.graeshoppe.order.client.bpmn.api.TasksApi;
 import com.diviso.graeshoppe.order.client.bpmn.model.RestFormProperty;
@@ -116,12 +117,14 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		orderDTO.setApprovalDetailsId(result.getId());
 		orderDTO.setStatusId(7l); // payment-processed-approved
 		orderService.update(orderDTO);
-		ApprovalInfo message = ApprovalInfo.newBuilder()
+		Builder message = ApprovalInfo.newBuilder()
 				.setAcceptedAt(result.getAcceptedAt().toEpochMilli())
-				.setExpectedDelivery(result.getExpectedDelivery().toEpochMilli())
-				.setOrderId(approvalDetailsDTO.getOrderId()).build();
+				.setOrderId(approvalDetailsDTO.getOrderId());
+		if(result.getExpectedDelivery()!=null) {
+			message.setExpectedDelivery(result.getExpectedDelivery().toEpochMilli());
+		}
 		try {
-			messagingService.publishApprovalDetails(message);
+			messagingService.publishApprovalDetails(message.build());
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
