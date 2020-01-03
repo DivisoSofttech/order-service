@@ -119,7 +119,7 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		ApprovalInfo message = ApprovalInfo.newBuilder()
 				.setAcceptedAt(result.getAcceptedAt().toEpochMilli())
 				.setExpectedDelivery(result.getExpectedDelivery().toEpochMilli())
-				.setOrderId(result.getOrderId()).build();
+				.setOrderId(approvalDetailsDTO.getOrderId()).build();
 		try {
 			messagingService.publishApprovalDetails(message);
 		} catch (ExecutionException e) {
