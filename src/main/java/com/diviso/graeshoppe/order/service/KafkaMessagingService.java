@@ -57,6 +57,7 @@ public class KafkaMessagingService {
 		this.kafkaProperties = kafkaProperties;
 		this.orderProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
 		this.notificatonProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
+		this.approvalDetailsProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
 		this.subscribePayment();
 	}
 
