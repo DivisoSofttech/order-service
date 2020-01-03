@@ -1,6 +1,8 @@
 package com.diviso.graeshoppe.order.service;
 
 import com.diviso.graeshoppe.notification.avro.Notification;
+import com.diviso.graeshoppe.order.avro.ApprovalDetails;
+import com.diviso.graeshoppe.order.avro.ApprovalInfo;
 import com.diviso.graeshoppe.order.avro.Order;
 import com.diviso.graeshoppe.payment.avro.Payment;
 
@@ -34,6 +36,8 @@ public class KafkaMessagingService {
 
 	@Value("${topic.order.destination}")
 	private String orderTopic;
+	@Value("${topic.approvalInfo.destination}")
+	private String approvaldetailsTopic;
 	@Value("${topic.payment.destination}")
 	private String paymentTopic;
 
@@ -45,6 +49,8 @@ public class KafkaMessagingService {
 	private final KafkaProperties kafkaProperties;
 	private KafkaProducer<String, Order> orderProducer;
 	private KafkaProducer<String, Notification> notificatonProducer;
+	private KafkaProducer<String, ApprovalInfo> approvalDetailsProducer;
+
 	private ExecutorService sseExecutorService = Executors.newCachedThreadPool();
 
 	public KafkaMessagingService(KafkaProperties kafkaProperties) {
@@ -54,6 +60,12 @@ public class KafkaMessagingService {
 		this.subscribePayment();
 	}
 
+	public PublishResult publishApprovalDetails(ApprovalInfo message) throws ExecutionException, InterruptedException {
+		RecordMetadata metadata = approvalDetailsProducer.send(new ProducerRecord<>(approvaldetailsTopic, message)).get();
+		return new PublishResult(metadata.topic(), metadata.partition(), metadata.offset(),
+				Instant.ofEpochMilli(metadata.timestamp()));
+	}
+	
 	public PublishResult publishOrder(Order message) throws ExecutionException, InterruptedException {
 		RecordMetadata metadata = orderProducer.send(new ProducerRecord<>(orderTopic, message)).get();
 		return new PublishResult(metadata.topic(), metadata.partition(), metadata.offset(),

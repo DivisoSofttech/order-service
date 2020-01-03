@@ -116,7 +116,7 @@ spring:
   jpa:
     open-in-view: false
     properties:
-      hibernate.jdbc.time_zone: Asia/Kolkata
+      hibernate.jdbc.time_zone: UTC
     hibernate:
       ddl-auto: none
       naming:
@@ -235,6 +235,8 @@ topic:
       destination: order
    notification:
       destination: notificationx
+   approvalInfo:
+      destination: approvalinfo
 bpmn:
    url: http://dev.servers.divisosofttech.com/activiti-rest/service
    processId: process:21:36433 #process:1:43 #process:4:78797 #process:2:42632 #process:1:10004

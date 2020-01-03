@@ -1,0 +1,14 @@
+
+  {
+	"namespace":"com.diviso.graeshoppe.order.avro",
+	"name":"ApprovalInfo",
+	"type":"record",
+	"fields":[
+		
+			   {"name":"orderId","type":["null","string"]},
+    		   {"name":"acceptedAt", "type":"long","logicalType":"date"},
+    		   {"name":"expectedDelivery", "type":"long","logicalType":"date"}
+    		   
+			]
+	}
+	

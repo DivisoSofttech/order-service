@@ -1,8 +1,10 @@
 package com.diviso.graeshoppe.order.service.impl;
 
 import com.diviso.graeshoppe.order.service.ApprovalDetailsService;
+import com.diviso.graeshoppe.order.service.KafkaMessagingService;
 import com.diviso.graeshoppe.order.service.NotificationCommandService;
 import com.diviso.graeshoppe.order.service.OrderCommandService;
+import com.diviso.graeshoppe.order.avro.ApprovalInfo;
 import com.diviso.graeshoppe.order.client.bpmn.api.FormsApi;
 import com.diviso.graeshoppe.order.client.bpmn.api.TasksApi;
 import com.diviso.graeshoppe.order.client.bpmn.model.RestFormProperty;
@@ -32,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
@@ -55,7 +58,7 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 	private NotificationCommandService notificationService;
 	@Autowired
 	private OrderCommandService orderService;
-	
+
 	@Autowired
 	private OrderRepository orderRespository;
 	@Autowired
@@ -66,6 +69,9 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 	private final ApprovalDetailsMapper approvalDetailsMapper;
 
 	private final ApprovalDetailsSearchRepository approvalDetailsSearchRepository;
+
+	@Autowired
+	private KafkaMessagingService messagingService;
 
 	public ApprovalDetailsServiceImpl(ApprovalDetailsRepository approvalDetailsRepository,
 			ApprovalDetailsMapper approvalDetailsMapper,
@@ -88,9 +94,9 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		approvalDetails = approvalDetailsRepository.save(approvalDetails);
 		ApprovalDetailsDTO result = approvalDetailsMapper.toDto(approvalDetails);
 		approvalDetailsSearchRepository.save(approvalDetails);
-		CommandResource result1 = acceptOrder(approvalDetailsDTO, taskId);
-		result1.setSelfId(result.getId());
 		OrderDTO orderDTO = orderService.findByOrderID(approvalDetailsDTO.getOrderId()).get();
+		CommandResource result1 = acceptOrder(approvalDetailsDTO, taskId,orderDTO.getPreOrderDate());
+		result1.setSelfId(result.getId());
 		NotificationDTO notificationDTO = new NotificationDTO();
 		notificationDTO.setDate(approvalDetailsDTO.getAcceptedAt());
 		if (approvalDetailsDTO.getDecision().equals("accepted")) {
@@ -104,24 +110,27 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		notificationDTO.setStatus("unread");
 		notificationDTO.setReceiverId(orderDTO.getCustomerId());
 		notificationDTO.setType("Approved-Notification");
-		NotificationDTO resultNotification=notificationService.save(notificationDTO); // sending notifications from here to the customer
+		NotificationDTO resultNotification = notificationService.save(notificationDTO); // sending notifications from
+																						// here to the customer
 		notificationService.publishNotificationToMessageBroker(resultNotification);
 		orderDTO.setApprovalDetailsId(result.getId());
-		orderDTO.setStatusId(7l); //payment-processed-approved
+		orderDTO.setStatusId(7l); // payment-processed-approved
 		orderService.update(orderDTO);
-//		Long phone=0l;
-//		DeliveryInfo deliveryInfo=orderRespository.findDeliveryInfoByOrderId(orderDTO.getOrderId());
-//		if(deliveryInfo.getDeliveryAddress()!=null) {
-//			phone = deliveryInfo.getDeliveryAddress().getPhone();
-//		} else {
-//			Customer customer = customerResourceApi.findByReferenceUsingGET(orderDTO.getCustomerId()).getBody();
-//			phone = customer.getContact().getMobileNumber();
-//		}
-//		orderService.publishMesssage(approvalDetailsDTO.getOrderId(),phone,"CREATE");
+		ApprovalInfo message = ApprovalInfo.newBuilder()
+				.setAcceptedAt(result.getAcceptedAt().toEpochMilli())
+				.setExpectedDelivery(result.getExpectedDelivery().toEpochMilli())
+				.setOrderId(result.getOrderId()).build();
+		try {
+			messagingService.publishApprovalDetails(message);
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		return result1;
 	}
 
-	public CommandResource acceptOrder(ApprovalDetailsDTO acceptOrderRequest, String taskId) {
+	public CommandResource acceptOrder(ApprovalDetailsDTO acceptOrderRequest, String taskId,Instant preOrderDate) {
 
 		String processInstanceId = tasksApi.getTask(taskId).getBody().getProcessInstanceId();
 		log.info("ProcessInstanceId is+ " + processInstanceId);
@@ -134,7 +143,14 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		decision.setValue(acceptOrderRequest.getDecision());
 		properties.add(decision);
 
-		String stringDate = Date.from(acceptOrderRequest.getExpectedDelivery()).toString();
+		String stringDate = null;
+		if (acceptOrderRequest.getExpectedDelivery() != null) {
+			log.info("Expected delivery will be deliverytime");
+			stringDate = Date.from(acceptOrderRequest.getExpectedDelivery()).toString();
+		} else {
+			log.info("Preorder date will be delivery time");
+			stringDate = Date.from(preOrderDate).toString();
+		}
 		String date = stringDate.substring(4, 10);
 		String time = stringDate.substring(11, 16);
 		RestFormProperty deliveryTime = new RestFormProperty();
@@ -142,15 +158,13 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		deliveryTime.setName("deliveryTime");
 		deliveryTime.setType("String");
 		deliveryTime.setValue(date + " " + time);
+		log.info("Delivery Time is "+date+" time is "+time);
 		properties.add(deliveryTime);
 
 		formRequest.setProperties(properties);
 		formRequest.setAction("completed");
 		formRequest.setTaskId(taskId);
 		formsApi.submitForm(formRequest);
-		// orderRepository.findByOrderId(acceptOrderRequest.getOrderId());
-		// sendNotification(acceptOrderRequest.getOrderId(),
-		// acceptOrderRequest.getCustomerId());
 		CommandResource commandResource = resourceAssembler.toResource(processInstanceId);
 		return commandResource;
 	}

@@ -284,7 +284,6 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 			}
 		}
 		log.info("Phone number is publishing to kafka " + phone);
-
 		order.setOrderLines(orderLineRepository.findByOrder_OrderId(order.getOrderId()));
 		order.setAppliedOffers(offerRepository.findByOrder_Id(order.getId()));
 		log.info("Applied offers in order is " + order.getAppliedOffers());
@@ -298,6 +297,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 				.setOrderCountgraeshoppe(graeshoppeCount).setOrderCountRestaurant(restaurantCount)
 				.setGrandTotal(order.getGrandTotal()).setSubTotal(order.getSubTotal()).setEmail(order.getEmail())
 				.setPaymentMode(order.getPaymentMode()).setPaymentRef(order.getPaymentRef())
+				.setTimeZone(order.getTimeZone())
 				.setStatus(Status.newBuilder().setId(order.getStatus().getId()).setName(order.getStatus().getName())
 						.build())
 				.setOrderLines(order.getOrderLines().stream().map(this::toAvroOrderLine).collect(Collectors.toList()));
