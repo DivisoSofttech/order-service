@@ -88,16 +88,16 @@ spring:
   data:
      elasticsearch:
         cluster-name: 9a8bffb7a852435185aabd4670a7c19e
-        cluster-nodes: https://9a8bffb7a852435185aabd4670a7c19e.us-central1.gcp.cloud.es.io:9243/ 
+        cluster-nodes: https://ac309b81b27849d0b1af4969ff1aede3.us-central1.gcp.cloud.es.io:9243 
         properties:
            path:
               logs: target/elasticsearch/log
               data: target/elasticsearch/data
      jest:
-        password: zWmOqUXEJMFKJ66Zyn3erGt2 
+        password: 4CyQxbAbOvNQvCZ0OHa3iBE8 
         username: elastic
         readTimeout: 10000
-        uri: https://9a8bffb7a852435185aabd4670a7c19e.us-central1.gcp.cloud.es.io:9243
+        uri: https://ac309b81b27849d0b1af4969ff1aede3.us-central1.gcp.cloud.es.io:9243
   liquibase:
     # Remove 'faker' if you do not want the sample data to be loaded automatically
     contexts: dev #, faker
