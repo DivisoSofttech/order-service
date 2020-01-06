@@ -31,6 +31,7 @@ public class ResourceAssembler {
 		CommandResource commandResource = new CommandResource();
 		commandResource.setNextTaskId(taskId);
 		commandResource.setNextTaskName(taskName);
+		commandResource.setProcessId(processInstanceId);
 		return commandResource;
 	}
 

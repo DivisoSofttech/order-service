@@ -6,6 +6,7 @@ public class CommandResource {
 	private String nextTaskName;
 	private String orderId;
 	private Long selfId;
+	private String processId;
 	/**
 	 * @return the nextTaskId
 	 */
@@ -24,10 +25,12 @@ public class CommandResource {
 	public void setSelfId(Long selfId) {
 		this.selfId = selfId;
 	}
+	
 	@Override
 	public String toString() {
-		return String.format("CommandResource [nextTaskId=%s,\n nextTaskName=%s,\n orderId=%s]", nextTaskId,
-				nextTaskName, orderId);
+		return String.format(
+				"CommandResource [nextTaskId=%s,\n nextTaskName=%s,\n orderId=%s,\n selfId=%s,\n processId=%s]",
+				nextTaskId, nextTaskName, orderId, selfId, processId);
 	}
 	/**
 	 * @param nextTaskId the nextTaskId to set
@@ -58,6 +61,12 @@ public class CommandResource {
 	 */
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
+	}
+	public String getProcessId() {
+		return processId;
+	}
+	public void setProcessId(String processId) {
+		this.processId = processId;
 	}
 
 }

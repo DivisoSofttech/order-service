@@ -36,6 +36,8 @@ public class OrderDTO implements Serializable {
 
     private String acceptOrderId;
 
+    private String processId;
+
 
     private Long deliveryInfoId;
 
@@ -155,6 +157,14 @@ public class OrderDTO implements Serializable {
         this.acceptOrderId = acceptOrderId;
     }
 
+    public String getProcessId() {
+        return processId;
+    }
+
+    public void setProcessId(String processId) {
+        this.processId = processId;
+    }
+
     public Long getDeliveryInfoId() {
         return deliveryInfoId;
     }
@@ -217,6 +227,7 @@ public class OrderDTO implements Serializable {
             ", email='" + getEmail() + "'" +
             ", timeZone='" + getTimeZone() + "'" +
             ", acceptOrderId='" + getAcceptOrderId() + "'" +
+            ", processId='" + getProcessId() + "'" +
             ", deliveryInfoId=" + getDeliveryInfoId() +
             ", approvalDetailsId=" + getApprovalDetailsId() +
             ", statusId=" + getStatusId() +

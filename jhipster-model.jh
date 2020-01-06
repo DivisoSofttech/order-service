@@ -12,6 +12,7 @@ entity Order{
 	email String,
 	timeZone String,
 	acceptOrderId String,
+	processId String,
 }
 entity DeliveryInfo{
 	deliveryType String,

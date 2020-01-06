@@ -84,6 +84,9 @@ public class OrderResourceIT {
     private static final String DEFAULT_ACCEPT_ORDER_ID = "AAAAAAAAAA";
     private static final String UPDATED_ACCEPT_ORDER_ID = "BBBBBBBBBB";
 
+    private static final String DEFAULT_PROCESS_ID = "AAAAAAAAAA";
+    private static final String UPDATED_PROCESS_ID = "BBBBBBBBBB";
+
     @Autowired
     private OrderRepository orderRepository;
 
@@ -152,7 +155,8 @@ public class OrderResourceIT {
             .preOrderDate(DEFAULT_PRE_ORDER_DATE)
             .email(DEFAULT_EMAIL)
             .timeZone(DEFAULT_TIME_ZONE)
-            .acceptOrderId(DEFAULT_ACCEPT_ORDER_ID);
+            .acceptOrderId(DEFAULT_ACCEPT_ORDER_ID)
+            .processId(DEFAULT_PROCESS_ID);
         return order;
     }
     /**
@@ -175,7 +179,8 @@ public class OrderResourceIT {
             .preOrderDate(UPDATED_PRE_ORDER_DATE)
             .email(UPDATED_EMAIL)
             .timeZone(UPDATED_TIME_ZONE)
-            .acceptOrderId(UPDATED_ACCEPT_ORDER_ID);
+            .acceptOrderId(UPDATED_ACCEPT_ORDER_ID)
+            .processId(UPDATED_PROCESS_ID);
         return order;
     }
 
@@ -213,6 +218,7 @@ public class OrderResourceIT {
         assertThat(testOrder.getEmail()).isEqualTo(DEFAULT_EMAIL);
         assertThat(testOrder.getTimeZone()).isEqualTo(DEFAULT_TIME_ZONE);
         assertThat(testOrder.getAcceptOrderId()).isEqualTo(DEFAULT_ACCEPT_ORDER_ID);
+        assertThat(testOrder.getProcessId()).isEqualTo(DEFAULT_PROCESS_ID);
 
         // Validate the Order in Elasticsearch
         verify(mockOrderSearchRepository, times(1)).save(testOrder);
@@ -265,7 +271,8 @@ public class OrderResourceIT {
             .andExpect(jsonPath("$.[*].preOrderDate").value(hasItem(DEFAULT_PRE_ORDER_DATE.toString())))
             .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL)))
             .andExpect(jsonPath("$.[*].timeZone").value(hasItem(DEFAULT_TIME_ZONE)))
-            .andExpect(jsonPath("$.[*].acceptOrderId").value(hasItem(DEFAULT_ACCEPT_ORDER_ID)));
+            .andExpect(jsonPath("$.[*].acceptOrderId").value(hasItem(DEFAULT_ACCEPT_ORDER_ID)))
+            .andExpect(jsonPath("$.[*].processId").value(hasItem(DEFAULT_PROCESS_ID)));
     }
     
     @Test
@@ -291,7 +298,8 @@ public class OrderResourceIT {
             .andExpect(jsonPath("$.preOrderDate").value(DEFAULT_PRE_ORDER_DATE.toString()))
             .andExpect(jsonPath("$.email").value(DEFAULT_EMAIL))
             .andExpect(jsonPath("$.timeZone").value(DEFAULT_TIME_ZONE))
-            .andExpect(jsonPath("$.acceptOrderId").value(DEFAULT_ACCEPT_ORDER_ID));
+            .andExpect(jsonPath("$.acceptOrderId").value(DEFAULT_ACCEPT_ORDER_ID))
+            .andExpect(jsonPath("$.processId").value(DEFAULT_PROCESS_ID));
     }
 
     @Test
@@ -327,7 +335,8 @@ public class OrderResourceIT {
             .preOrderDate(UPDATED_PRE_ORDER_DATE)
             .email(UPDATED_EMAIL)
             .timeZone(UPDATED_TIME_ZONE)
-            .acceptOrderId(UPDATED_ACCEPT_ORDER_ID);
+            .acceptOrderId(UPDATED_ACCEPT_ORDER_ID)
+            .processId(UPDATED_PROCESS_ID);
         OrderDTO orderDTO = orderMapper.toDto(updatedOrder);
 
         restOrderMockMvc.perform(put("/api/orders")
@@ -352,6 +361,7 @@ public class OrderResourceIT {
         assertThat(testOrder.getEmail()).isEqualTo(UPDATED_EMAIL);
         assertThat(testOrder.getTimeZone()).isEqualTo(UPDATED_TIME_ZONE);
         assertThat(testOrder.getAcceptOrderId()).isEqualTo(UPDATED_ACCEPT_ORDER_ID);
+        assertThat(testOrder.getProcessId()).isEqualTo(UPDATED_PROCESS_ID);
 
         // Validate the Order in Elasticsearch
         verify(mockOrderSearchRepository, times(1)).save(testOrder);
@@ -424,6 +434,7 @@ public class OrderResourceIT {
             .andExpect(jsonPath("$.[*].preOrderDate").value(hasItem(DEFAULT_PRE_ORDER_DATE.toString())))
             .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL)))
             .andExpect(jsonPath("$.[*].timeZone").value(hasItem(DEFAULT_TIME_ZONE)))
-            .andExpect(jsonPath("$.[*].acceptOrderId").value(hasItem(DEFAULT_ACCEPT_ORDER_ID)));
+            .andExpect(jsonPath("$.[*].acceptOrderId").value(hasItem(DEFAULT_ACCEPT_ORDER_ID)))
+            .andExpect(jsonPath("$.[*].processId").value(hasItem(DEFAULT_PROCESS_ID)));
     }
 }

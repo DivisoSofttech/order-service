@@ -66,6 +66,9 @@ public class Order implements Serializable {
     @Column(name = "accept_order_id")
     private String acceptOrderId;
 
+    @Column(name = "process_id")
+    private String processId;
+
     @OneToOne
     @JoinColumn(unique = true)
     private DeliveryInfo deliveryInfo;
@@ -264,6 +267,19 @@ public class Order implements Serializable {
         this.acceptOrderId = acceptOrderId;
     }
 
+    public String getProcessId() {
+        return processId;
+    }
+
+    public Order processId(String processId) {
+        this.processId = processId;
+        return this;
+    }
+
+    public void setProcessId(String processId) {
+        this.processId = processId;
+    }
+
     public DeliveryInfo getDeliveryInfo() {
         return deliveryInfo;
     }
@@ -387,6 +403,7 @@ public class Order implements Serializable {
             ", email='" + getEmail() + "'" +
             ", timeZone='" + getTimeZone() + "'" +
             ", acceptOrderId='" + getAcceptOrderId() + "'" +
+            ", processId='" + getProcessId() + "'" +
             "}";
     }
 }
