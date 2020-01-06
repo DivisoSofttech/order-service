@@ -58,7 +58,7 @@ class OrderKafkaResourceIT {
         consumerProps.put("client.id", "default-client");
         kafkaProperties.setConsumer(consumerProps);
 
-        KafkaMessagingService kafkaResource = new KafkaMessagingService(kafkaProperties);
+        KafkaMessagingService kafkaResource = null;//new KafkaMessagingService(kafkaProperties);
 
         restMockMvc = MockMvcBuilders.standaloneSetup(kafkaResource).build();
     }
