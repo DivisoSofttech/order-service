@@ -26,6 +26,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -97,21 +98,8 @@ public class KafkaMessagingService {
 					records.forEach(record -> {
 						log.info("Record payment consumed is " + record.value());
 						Payment payment = record.value();
-						System.out.println("Order Command Service is "+orderCommandService);
-						Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(payment.getTargetId());
-						if (orderDTO.isPresent()) {
-							orderDTO.get().setPaymentMode(payment.getPaymentType().toUpperCase());
-							orderDTO.get().setPaymentRef(payment.getId().toString()); // in order to set the status need
-																						// to check the
-							OpenTask openTask = OrderQueryService.getOpenTask("Accept Order",
-									orderDTO.get().getOrderId(), orderDTO.get().getStoreId()); // order flow if advanced
-																								// flow this // works
-							orderDTO.get().setStatusId(6l); // payment-processed-unapproved
-							orderDTO.get().setAcceptOrderId(openTask.getTaskId());
-							orderCommandService.update(orderDTO.get());
-							log.info("Order updated with payment ref" + payment.getTargetId());
-							orderCommandService.publishMesssage(payment.getTargetId());
-						}
+						System.out.println("Order Command Service is " + orderCommandService);
+						updateOrder(payment);
 					});
 
 				} catch (Exception ex) {
@@ -141,7 +129,24 @@ public class KafkaMessagingService {
 		}
 	}
 
-	// public void updateOrder(Payment payment) {
+	public void updateOrder(Payment payment) {
 
-	// }
+		CompletableFuture.runAsync(() -> {
+			Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(payment.getTargetId());
+			if (orderDTO.isPresent()) {
+				orderDTO.get().setPaymentMode(payment.getPaymentType().toUpperCase());
+				orderDTO.get().setPaymentRef(payment.getId().toString()); // in order to set the status need
+																			// to check the
+				OpenTask openTask = OrderQueryService.getOpenTask("Accept Order", orderDTO.get().getOrderId(),
+						orderDTO.get().getStoreId()); // order flow if advanced
+														// flow this // works
+				orderDTO.get().setStatusId(6l); // payment-processed-unapproved
+				orderDTO.get().setAcceptOrderId(openTask.getTaskId());
+				orderCommandService.update(orderDTO.get());
+				log.info("Order updated with payment ref" + payment.getTargetId());
+				orderCommandService.publishMesssage(payment.getTargetId());
+			}
+
+		});
+	}
 }
