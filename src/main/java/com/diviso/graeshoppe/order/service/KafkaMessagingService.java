@@ -149,4 +149,9 @@ public class KafkaMessagingService {
 
 		});
 	}
+
+	public void startConsumers() {
+
+		subscribePayment();
+	}
 }

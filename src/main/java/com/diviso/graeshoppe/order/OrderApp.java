@@ -1,6 +1,7 @@
 package com.diviso.graeshoppe.order;
 
 import com.diviso.graeshoppe.order.config.ApplicationProperties;
+import com.diviso.graeshoppe.order.service.KafkaMessagingService;
 
 import io.github.jhipster.config.DefaultProfileUtil;
 import io.github.jhipster.config.JHipsterConstants;
@@ -14,6 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
 
@@ -65,8 +67,10 @@ public class OrderApp implements InitializingBean {
      */
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(OrderApp.class);
+        ConfigurableApplicationContext applicationContext = app.run(args);
         DefaultProfileUtil.addDefaultProfile(app);
-        Environment env = app.run(args).getEnvironment();
+        applicationContext.getBean(KafkaMessagingService.class).startConsumers();
+        Environment env = applicationContext.getEnvironment();
         logApplicationStartup(env);
     }
 
