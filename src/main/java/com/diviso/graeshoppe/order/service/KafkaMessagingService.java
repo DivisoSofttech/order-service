@@ -46,8 +46,8 @@ public class KafkaMessagingService {
 	
 	private final OrderCommandService orderCommandService;
 
-	@Autowired
-	private OrderQueryService OrderQueryService;
+	
+	private final OrderQueryService orderQueryService;
 
 	@Value("${topic.notification.destination}")
 	private String notificationTopic;
@@ -58,12 +58,14 @@ public class KafkaMessagingService {
 
 	private ExecutorService sseExecutorService = Executors.newCachedThreadPool();
 
-	public KafkaMessagingService(OrderCommandService orderCommandService,KafkaProperties kafkaProperties) {
+	public KafkaMessagingService(OrderCommandService orderCommandService,OrderQueryService orderQueryService,KafkaProperties kafkaProperties) {
 		this.kafkaProperties = kafkaProperties;
 		this.orderCommandService  = orderCommandService;
+		this.orderQueryService = orderQueryService;
 		this.orderProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
 		this.notificatonProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
 		this.approvalDetailsProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
+		startConsumers();
 	}
 
 	public PublishResult publishApprovalDetails(ApprovalInfo message) throws ExecutionException, InterruptedException {
@@ -104,7 +106,7 @@ public class KafkaMessagingService {
 							orderDTO.get().setPaymentMode(payment.getPaymentType().toUpperCase());
 							orderDTO.get().setPaymentRef(payment.getId().toString()); // in order to set the status need
 																						// to check the
-							OpenTask openTask = OrderQueryService.getOpenTask("Accept Order", orderDTO.get().getOrderId(),
+							OpenTask openTask = orderQueryService.getOpenTask("Accept Order", orderDTO.get().getOrderId(),
 									orderDTO.get().getStoreId(), orderDTO.get().getProcessId()); // order flow if advanced
 							// flow this // works
 							orderDTO.get().setStatusId(6l); // payment-processed-unapproved
