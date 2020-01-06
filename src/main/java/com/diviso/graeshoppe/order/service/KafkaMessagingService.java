@@ -7,6 +7,7 @@ import com.diviso.graeshoppe.order.avro.Order;
 import com.diviso.graeshoppe.payment.avro.Payment;
 
 import com.diviso.graeshoppe.order.config.KafkaProperties;
+import com.diviso.graeshoppe.order.models.OpenTask;
 import com.diviso.graeshoppe.order.service.dto.OrderDTO;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -44,6 +45,9 @@ public class KafkaMessagingService {
 	@Autowired
 	private OrderCommandService orderCommandService;
 
+	@Autowired
+	private OrderQueryService OrderQueryService;
+
 	@Value("${topic.notification.destination}")
 	private String notificationTopic;
 	private final KafkaProperties kafkaProperties;
@@ -62,11 +66,12 @@ public class KafkaMessagingService {
 	}
 
 	public PublishResult publishApprovalDetails(ApprovalInfo message) throws ExecutionException, InterruptedException {
-		RecordMetadata metadata = approvalDetailsProducer.send(new ProducerRecord<>(approvaldetailsTopic, message)).get();
+		RecordMetadata metadata = approvalDetailsProducer.send(new ProducerRecord<>(approvaldetailsTopic, message))
+				.get();
 		return new PublishResult(metadata.topic(), metadata.partition(), metadata.offset(),
 				Instant.ofEpochMilli(metadata.timestamp()));
 	}
-	
+
 	public PublishResult publishOrder(Order message) throws ExecutionException, InterruptedException {
 		RecordMetadata metadata = orderProducer.send(new ProducerRecord<>(orderTopic, message)).get();
 		return new PublishResult(metadata.topic(), metadata.partition(), metadata.offset(),
@@ -89,22 +94,25 @@ public class KafkaMessagingService {
 				try {
 					ConsumerRecords<String, Payment> records = consumer.poll(Duration.ofSeconds(3));
 
-					records.forEach(record->{
+					records.forEach(record -> {
 						log.info("Record payment consumed is " + record.value());
 						Payment payment = record.value();
 						Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(payment.getTargetId());
 						if (orderDTO.isPresent()) {
 							orderDTO.get().setPaymentMode(payment.getPaymentType().toUpperCase());
-							orderDTO.get().setPaymentRef(payment.getId().toString()); // in order to set the status need to check the
-																						// order flow if advanced flow this // works
+							orderDTO.get().setPaymentRef(payment.getId().toString()); // in order to set the status need
+																						// to check the
+							OpenTask openTask = OrderQueryService.getOpenTask("Accept Order",
+									orderDTO.get().getOrderId(), orderDTO.get().getStoreId()); // order flow if advanced
+																								// flow this // works
 							orderDTO.get().setStatusId(6l); // payment-processed-unapproved
+							orderDTO.get().setAcceptOrderId(openTask.getTaskId());
 							orderCommandService.update(orderDTO.get());
-							log.info("Order updated with payment ref"+ payment.getTargetId());
+							log.info("Order updated with payment ref" + payment.getTargetId());
 							orderCommandService.publishMesssage(payment.getTargetId());
-						}	
+						}
 					});
-						
-						
+
 				} catch (Exception ex) {
 					log.trace("Complete with error {}", ex.getMessage(), ex);
 					exitLoop = true;
@@ -115,7 +123,7 @@ public class KafkaMessagingService {
 			consumer.close();
 		});
 
-		//paymentThread.start();
+		// paymentThread.start();
 	}
 
 	public static class PublishResult {
@@ -132,9 +140,7 @@ public class KafkaMessagingService {
 		}
 	}
 
-	//public void updateOrder(Payment payment) {
+	// public void updateOrder(Payment payment) {
 
-		
-
-	//}
+	// }
 }

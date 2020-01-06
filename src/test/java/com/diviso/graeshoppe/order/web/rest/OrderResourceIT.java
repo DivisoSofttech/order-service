@@ -5,7 +5,6 @@ import com.diviso.graeshoppe.order.config.TestSecurityConfiguration;
 import com.diviso.graeshoppe.order.domain.Order;
 import com.diviso.graeshoppe.order.repository.OrderRepository;
 import com.diviso.graeshoppe.order.repository.search.OrderSearchRepository;
-import com.diviso.graeshoppe.order.service.OrderCommandService;
 import com.diviso.graeshoppe.order.service.OrderService;
 import com.diviso.graeshoppe.order.service.dto.OrderDTO;
 import com.diviso.graeshoppe.order.service.mapper.OrderMapper;
@@ -82,6 +81,9 @@ public class OrderResourceIT {
     private static final String DEFAULT_TIME_ZONE = "AAAAAAAAAA";
     private static final String UPDATED_TIME_ZONE = "BBBBBBBBBB";
 
+    private static final String DEFAULT_ACCEPT_ORDER_ID = "AAAAAAAAAA";
+    private static final String UPDATED_ACCEPT_ORDER_ID = "BBBBBBBBBB";
+
     @Autowired
     private OrderRepository orderRepository;
 
@@ -89,7 +91,7 @@ public class OrderResourceIT {
     private OrderMapper orderMapper;
 
     @Autowired
-    private OrderCommandService orderService;
+    private OrderService orderService;
 
     /**
      * This repository is mocked in the com.diviso.graeshoppe.order.repository.search test package.
@@ -121,7 +123,7 @@ public class OrderResourceIT {
     @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final OrderCommandResource orderResource = new OrderCommandResource(orderService);
+        final OrderResource orderResource = new OrderResource(orderService);
         this.restOrderMockMvc = MockMvcBuilders.standaloneSetup(orderResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -149,7 +151,8 @@ public class OrderResourceIT {
             .allergyNote(DEFAULT_ALLERGY_NOTE)
             .preOrderDate(DEFAULT_PRE_ORDER_DATE)
             .email(DEFAULT_EMAIL)
-            .timeZone(DEFAULT_TIME_ZONE);
+            .timeZone(DEFAULT_TIME_ZONE)
+            .acceptOrderId(DEFAULT_ACCEPT_ORDER_ID);
         return order;
     }
     /**
@@ -171,7 +174,8 @@ public class OrderResourceIT {
             .allergyNote(UPDATED_ALLERGY_NOTE)
             .preOrderDate(UPDATED_PRE_ORDER_DATE)
             .email(UPDATED_EMAIL)
-            .timeZone(UPDATED_TIME_ZONE);
+            .timeZone(UPDATED_TIME_ZONE)
+            .acceptOrderId(UPDATED_ACCEPT_ORDER_ID);
         return order;
     }
 
@@ -208,6 +212,7 @@ public class OrderResourceIT {
         assertThat(testOrder.getPreOrderDate()).isEqualTo(DEFAULT_PRE_ORDER_DATE);
         assertThat(testOrder.getEmail()).isEqualTo(DEFAULT_EMAIL);
         assertThat(testOrder.getTimeZone()).isEqualTo(DEFAULT_TIME_ZONE);
+        assertThat(testOrder.getAcceptOrderId()).isEqualTo(DEFAULT_ACCEPT_ORDER_ID);
 
         // Validate the Order in Elasticsearch
         verify(mockOrderSearchRepository, times(1)).save(testOrder);
@@ -259,7 +264,8 @@ public class OrderResourceIT {
             .andExpect(jsonPath("$.[*].allergyNote").value(hasItem(DEFAULT_ALLERGY_NOTE)))
             .andExpect(jsonPath("$.[*].preOrderDate").value(hasItem(DEFAULT_PRE_ORDER_DATE.toString())))
             .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL)))
-            .andExpect(jsonPath("$.[*].timeZone").value(hasItem(DEFAULT_TIME_ZONE)));
+            .andExpect(jsonPath("$.[*].timeZone").value(hasItem(DEFAULT_TIME_ZONE)))
+            .andExpect(jsonPath("$.[*].acceptOrderId").value(hasItem(DEFAULT_ACCEPT_ORDER_ID)));
     }
     
     @Test
@@ -284,7 +290,8 @@ public class OrderResourceIT {
             .andExpect(jsonPath("$.allergyNote").value(DEFAULT_ALLERGY_NOTE))
             .andExpect(jsonPath("$.preOrderDate").value(DEFAULT_PRE_ORDER_DATE.toString()))
             .andExpect(jsonPath("$.email").value(DEFAULT_EMAIL))
-            .andExpect(jsonPath("$.timeZone").value(DEFAULT_TIME_ZONE));
+            .andExpect(jsonPath("$.timeZone").value(DEFAULT_TIME_ZONE))
+            .andExpect(jsonPath("$.acceptOrderId").value(DEFAULT_ACCEPT_ORDER_ID));
     }
 
     @Test
@@ -319,7 +326,8 @@ public class OrderResourceIT {
             .allergyNote(UPDATED_ALLERGY_NOTE)
             .preOrderDate(UPDATED_PRE_ORDER_DATE)
             .email(UPDATED_EMAIL)
-            .timeZone(UPDATED_TIME_ZONE);
+            .timeZone(UPDATED_TIME_ZONE)
+            .acceptOrderId(UPDATED_ACCEPT_ORDER_ID);
         OrderDTO orderDTO = orderMapper.toDto(updatedOrder);
 
         restOrderMockMvc.perform(put("/api/orders")
@@ -343,6 +351,7 @@ public class OrderResourceIT {
         assertThat(testOrder.getPreOrderDate()).isEqualTo(UPDATED_PRE_ORDER_DATE);
         assertThat(testOrder.getEmail()).isEqualTo(UPDATED_EMAIL);
         assertThat(testOrder.getTimeZone()).isEqualTo(UPDATED_TIME_ZONE);
+        assertThat(testOrder.getAcceptOrderId()).isEqualTo(UPDATED_ACCEPT_ORDER_ID);
 
         // Validate the Order in Elasticsearch
         verify(mockOrderSearchRepository, times(1)).save(testOrder);
@@ -414,6 +423,7 @@ public class OrderResourceIT {
             .andExpect(jsonPath("$.[*].allergyNote").value(hasItem(DEFAULT_ALLERGY_NOTE)))
             .andExpect(jsonPath("$.[*].preOrderDate").value(hasItem(DEFAULT_PRE_ORDER_DATE.toString())))
             .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL)))
-            .andExpect(jsonPath("$.[*].timeZone").value(hasItem(DEFAULT_TIME_ZONE)));
+            .andExpect(jsonPath("$.[*].timeZone").value(hasItem(DEFAULT_TIME_ZONE)))
+            .andExpect(jsonPath("$.[*].acceptOrderId").value(hasItem(DEFAULT_ACCEPT_ORDER_ID)));
     }
 }

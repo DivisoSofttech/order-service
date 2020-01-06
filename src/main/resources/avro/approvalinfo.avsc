@@ -7,7 +7,7 @@
 		
 			   {"name":"orderId","type":["null","string"]},
     		   {"name":"acceptedAt", "type":"long","logicalType":"date"},
-    		   {"name":"expectedDelivery", "type":"long","logicalType":"date"}
+    		   {"name":"expectedDelivery", "type":"long","logicalType":"date","default": 0}
     		   
 			]
 	}

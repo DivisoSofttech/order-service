@@ -10,7 +10,8 @@ entity Order{
 	allergyNote String,
 	preOrderDate Instant,
 	email String,
-	timeZone String
+	timeZone String,
+	acceptOrderId String,
 }
 entity DeliveryInfo{
 	deliveryType String,
