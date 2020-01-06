@@ -96,7 +96,7 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		ApprovalDetailsDTO result = approvalDetailsMapper.toDto(approvalDetails);
 		approvalDetailsSearchRepository.save(approvalDetails);
 		OrderDTO orderDTO = orderService.findByOrderID(approvalDetailsDTO.getOrderId()).get();
-		CommandResource result1 = acceptOrder(approvalDetailsDTO, taskId,orderDTO.getPreOrderDate());
+		CommandResource result1 = acceptOrder(approvalDetailsDTO, taskId,orderDTO.getPreOrderDate(),orderDTO.getProcessId());
 		result1.setSelfId(result.getId());
 		NotificationDTO notificationDTO = new NotificationDTO();
 		notificationDTO.setDate(approvalDetailsDTO.getAcceptedAt());
@@ -133,9 +133,8 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		return result1;
 	}
 
-	public CommandResource acceptOrder(ApprovalDetailsDTO acceptOrderRequest, String taskId,Instant preOrderDate) {
+	public CommandResource acceptOrder(ApprovalDetailsDTO acceptOrderRequest, String taskId,Instant preOrderDate, String processInstanceId) {
 
-		String processInstanceId = tasksApi.getTask(taskId).getBody().getProcessInstanceId();
 		log.info("ProcessInstanceId is+ " + processInstanceId);
 		SubmitFormRequest formRequest = new SubmitFormRequest();
 		List<RestFormProperty> properties = new ArrayList<RestFormProperty>();

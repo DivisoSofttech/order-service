@@ -12,6 +12,6 @@ public interface OrderQueryService {
 	public OrderDTO findByDeliveryInfoId(Long id);
 	public long countByStoreIdAndCustomerId(String storeId, String customerId);
 	public DeliveryInfo findDeliveryInfoByOrderId(String orderId);
-	public OpenTask getOpenTask(String taskName, String orderId, String storeId);
+	public OpenTask getOpenTask(String taskName, String orderId, String storeId,String processInstanceId);
 	
 }

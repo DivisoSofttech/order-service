@@ -101,7 +101,7 @@ public class DeliveryInfoCommandServiceImpl implements DeliveryInfoService {
 		Long phoneCode = customer.getContact().getPhoneCode();
 		String customerEmail = customer.getContact().getEmail();
 		CommandResource commandResource = confirmDelivery(taskId, phone, phoneCode, deliveryInfoDTO.getDeliveryType(),
-				customerEmail, storeMail);
+				customerEmail, storeMail,orderDTO.getProcessId());
 		commandResource.setSelfId(result.getId());
 		update(result);
 		orderDTO.setDeliveryInfoId(deliveryInfo.getId()); // updating the delivery info in corresponding order
@@ -138,8 +138,7 @@ public class DeliveryInfoCommandServiceImpl implements DeliveryInfoService {
 	}
 
 	public CommandResource confirmDelivery(String taskId, Long phone, Long phoneCode, String deliveryType,
-			String customerMail, String storeMail) {
-		String processInstanceId = tasksApi.getTask(taskId).getBody().getProcessInstanceId();
+			String customerMail, String storeMail, String processInstanceId) {
 		SubmitFormRequest formRequest = new SubmitFormRequest();
 		List<RestFormProperty> properties = new ArrayList<RestFormProperty>();
 		RestFormProperty phoneProperty = new RestFormProperty();

@@ -48,7 +48,7 @@ public class OrderQueryServiceImpl implements OrderQueryService {
 
 	@Override
 	public Long countByCustomerIdAndStatusName(String customerId, String statusName) {
-	
+
 		return orderRepository.countByCustomerIdAndStatus_Name(customerId, statusName);
 	}
 
@@ -64,38 +64,31 @@ public class OrderQueryServiceImpl implements OrderQueryService {
 
 	@Override
 	public DeliveryInfo findDeliveryInfoByOrderId(String orderId) {
-		
+
 		return orderRepository.findDeliveryInfoByOrderId(orderId);
 	}
 
 	@Override
-	public OpenTask getOpenTask(String taskName, String orderId, String storeId) {
-		return  getTasks(taskName, null, storeId, null, null, null, null, null, null, null)
-				.stream().filter(openTask->openTask.getOrderId().equals(orderId)).findFirst().get();
+	public OpenTask getOpenTask(String taskName, String orderId, String storeId,String processInstanceId) {
+		return getTasks(taskName, null, storeId, null, null, null, null, null, null, null,processInstanceId).stream()
+				.filter(openTask -> openTask.getOrderId().equals(orderId)).findFirst().get();
 	}
 
-	@GetMapping("/tasks")
-	public List<OpenTask> getTasks(@RequestParam(value = "name", required = false) String name,
-			@RequestParam(value = "nameLike", required = false) String nameLike,
-			@RequestParam(value = "assignee", required = false) String assignee,
-			@RequestParam(value = "assigneeLike", required = false) String assigneeLike,
-			@RequestParam(value = "candidateUser", required = false) String candidateUser,
-			@RequestParam(value = "candidateGroup", required = false) String candidateGroup,
-			@RequestParam(value = "candidateGroups", required = false) String candidateGroups,
-			@Valid @RequestParam(value = "createdOn", required = false) String createdOn,
-			@Valid @RequestParam(value = "createdBefore", required = false) String createdBefore,
-			@Valid @RequestParam(value = "createdAfter", required = false) String createdAfter/*Pageable pageable*/) {
+	public List<OpenTask> getTasks(String name, String nameLike, String assignee, String assigneeLike,
+			String candidateUser, String candidateGroup, String candidateGroups, String createdOn, String createdBefore,
+			String createdAfter,String processInstanceId) {
 
-		
 		ResponseEntity<DataResponse> response = tasksApi.getTasks(name, nameLike, null, null, null, null, assignee,
 				assigneeLike, null, null, null, null, candidateUser, candidateGroup, candidateGroups, null, null, null,
-				null, null, null, null, null, null, null, null, null, createdOn, createdBefore, createdAfter, null,
-				null, null, null, null, null, null, null, null, null, null, null, null, /*pageable.getPageNumber()+""*/"0",null, "desc",/* pageable.getPageSize()+""*/"150");
+				processInstanceId, null, null, null, null, null, null, null, null, createdOn, createdBefore, createdAfter, null,
+				null, null, null, null, null, null, null, null, null, null, null, null,
+				/* pageable.getPageNumber()+"" */"0", null, "desc", /* pageable.getPageSize()+"" */"150");
 		List<LinkedHashMap<String, String>> myTasks = (List<LinkedHashMap<String, String>>) response.getBody()
 				.getData();
-		
-		List<OpenTask> tasks=new ArrayList<OpenTask>();
-		//Page<OpenTask> page=new PageImpl<>(tasks, pageable, response.getBody().getTotal());
+
+		List<OpenTask> tasks = new ArrayList<OpenTask>();
+		// Page<OpenTask> page=new PageImpl<>(tasks, pageable,
+		// response.getBody().getTotal());
 		myTasks.forEach(task -> {
 			OpenTask openTask = new OpenTask();
 			String taskProcessInstanceId = task.get("processInstanceId");
@@ -128,7 +121,7 @@ public class OrderQueryServiceImpl implements OrderQueryService {
 		log.info("Number of tasks in the collection " + initiateOrderTask.size());
 		log.info("Task Id of the initiateorder is " + taskId);
 		String orderId = null;
-		for(LinkedHashMap<String, String> formMap:orderDetailsForm) {
+		for (LinkedHashMap<String, String> formMap : orderDetailsForm) {
 			String propertyId = formMap.get("propertyId");
 			if (propertyId.equals("orderId")) {
 				orderId = formMap.get("propertyValue");
@@ -137,6 +130,7 @@ public class OrderQueryServiceImpl implements OrderQueryService {
 		}
 		return orderId;
 	}
+
 	public ResponseEntity<DataResponse> getHistoricTaskusingProcessInstanceIdAndName(String processInstanceId,
 			String name) {
 		return historyApi.listHistoricTaskInstances(null, processInstanceId, null, null, null, null, null, null, null,
@@ -144,6 +138,5 @@ public class OrderQueryServiceImpl implements OrderQueryService {
 				null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
 	}
-	
-	
+
 }

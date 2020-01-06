@@ -138,8 +138,8 @@ public class KafkaMessagingService {
 				orderDTO.get().setPaymentRef(payment.getId().toString()); // in order to set the status need
 																			// to check the
 				OpenTask openTask = OrderQueryService.getOpenTask("Accept Order", orderDTO.get().getOrderId(),
-						orderDTO.get().getStoreId()); // order flow if advanced
-														// flow this // works
+						orderDTO.get().getStoreId(), orderDTO.get().getProcessId()); // order flow if advanced
+				// flow this // works
 				orderDTO.get().setStatusId(6l); // payment-processed-unapproved
 				orderDTO.get().setAcceptOrderId(openTask.getTaskId());
 				orderCommandService.update(orderDTO.get());

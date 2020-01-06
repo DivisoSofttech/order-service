@@ -37,10 +37,10 @@ public class OrderQueryResource {
 	private OrderQueryService orderQueryService;
 	
 	
-	@GetMapping("/taskDetails/{taskName}/{orderId}/{storeId}")
-	public OpenTask getTaskDetails(@PathVariable String taskName,@PathVariable String orderId,@PathVariable String storeId) {
+	@GetMapping("/taskDetails/{taskName}/{orderId}/{storeId}/{processId}")
+	public OpenTask getTaskDetails(@PathVariable String taskName,@PathVariable String orderId,@PathVariable String storeId,String processId) {
 		
-		return orderQueryService.getOpenTask(taskName,orderId,storeId);
+		return orderQueryService.getOpenTask(taskName,orderId,storeId,processId);
 		
 		
 	}
