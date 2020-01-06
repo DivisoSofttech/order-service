@@ -43,8 +43,8 @@ public class KafkaMessagingService {
 	@Value("${topic.payment.destination}")
 	private String paymentTopic;
 
-	@Autowired
-	private OrderCommandService orderCommandService;
+	
+	private final OrderCommandService orderCommandService;
 
 	@Autowired
 	private OrderQueryService OrderQueryService;
@@ -58,12 +58,12 @@ public class KafkaMessagingService {
 
 	private ExecutorService sseExecutorService = Executors.newCachedThreadPool();
 
-	public KafkaMessagingService(KafkaProperties kafkaProperties) {
+	public KafkaMessagingService(OrderCommandService orderCommandService,KafkaProperties kafkaProperties) {
 		this.kafkaProperties = kafkaProperties;
+		this.orderCommandService  = orderCommandService;
 		this.orderProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
 		this.notificatonProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
 		this.approvalDetailsProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
-		this.subscribePayment();
 	}
 
 	public PublishResult publishApprovalDetails(ApprovalInfo message) throws ExecutionException, InterruptedException {
@@ -99,7 +99,20 @@ public class KafkaMessagingService {
 						log.info("Record payment consumed is " + record.value());
 						Payment payment = record.value();
 						System.out.println("Order Command Service is " + orderCommandService);
-						updateOrder(payment);
+						Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(payment.getTargetId());
+						if (orderDTO.isPresent()) {
+							orderDTO.get().setPaymentMode(payment.getPaymentType().toUpperCase());
+							orderDTO.get().setPaymentRef(payment.getId().toString()); // in order to set the status need
+																						// to check the
+							OpenTask openTask = OrderQueryService.getOpenTask("Accept Order", orderDTO.get().getOrderId(),
+									orderDTO.get().getStoreId(), orderDTO.get().getProcessId()); // order flow if advanced
+							// flow this // works
+							orderDTO.get().setStatusId(6l); // payment-processed-unapproved
+							orderDTO.get().setAcceptOrderId(openTask.getTaskId());
+							orderCommandService.update(orderDTO.get());
+							log.info("Order updated with payment ref" + payment.getTargetId());
+							orderCommandService.publishMesssage(payment.getTargetId());
+						}
 					});
 
 				} catch (Exception ex) {
@@ -132,20 +145,7 @@ public class KafkaMessagingService {
 	public void updateOrder(Payment payment) {
 
 		CompletableFuture.runAsync(() -> {
-			Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(payment.getTargetId());
-			if (orderDTO.isPresent()) {
-				orderDTO.get().setPaymentMode(payment.getPaymentType().toUpperCase());
-				orderDTO.get().setPaymentRef(payment.getId().toString()); // in order to set the status need
-																			// to check the
-				OpenTask openTask = OrderQueryService.getOpenTask("Accept Order", orderDTO.get().getOrderId(),
-						orderDTO.get().getStoreId(), orderDTO.get().getProcessId()); // order flow if advanced
-				// flow this // works
-				orderDTO.get().setStatusId(6l); // payment-processed-unapproved
-				orderDTO.get().setAcceptOrderId(openTask.getTaskId());
-				orderCommandService.update(orderDTO.get());
-				log.info("Order updated with payment ref" + payment.getTargetId());
-				orderCommandService.publishMesssage(payment.getTargetId());
-			}
+			
 
 		});
 	}

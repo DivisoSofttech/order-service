@@ -83,7 +83,6 @@ public class OrderQueryServiceImpl implements OrderQueryService {
 				processInstanceId, null, null, null, null, null, null, null, null, createdOn, createdBefore, createdAfter, null,
 				null, null, null, null, null, null, null, null, null, null, null, null,
 				/* pageable.getPageNumber()+"" */"0", null, "desc", /* pageable.getPageSize()+"" */"1");
-		System.out.println("GetTasks response "+response);
 		List<LinkedHashMap<String, String>> myTasks = (List<LinkedHashMap<String, String>>) response.getBody()
 				.getData();
 
