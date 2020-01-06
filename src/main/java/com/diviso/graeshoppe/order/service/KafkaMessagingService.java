@@ -43,8 +43,8 @@ public class KafkaMessagingService {
 	@Value("${topic.payment.destination}")
 	private String paymentTopic;
 
-	
-	private final OrderCommandService orderCommandService;
+	@Autowired
+	private  OrderCommandService orderCommandService;
 
 	
 	private final OrderQueryService orderQueryService;
@@ -58,14 +58,12 @@ public class KafkaMessagingService {
 
 	private ExecutorService sseExecutorService = Executors.newCachedThreadPool();
 
-	public KafkaMessagingService(OrderCommandService orderCommandService,OrderQueryService orderQueryService,KafkaProperties kafkaProperties) {
+	public KafkaMessagingService(OrderQueryService orderQueryService,KafkaProperties kafkaProperties) {
 		this.kafkaProperties = kafkaProperties;
-		this.orderCommandService  = orderCommandService;
 		this.orderQueryService = orderQueryService;
 		this.orderProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
 		this.notificatonProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
 		this.approvalDetailsProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
-		startConsumers();
 	}
 
 	public PublishResult publishApprovalDetails(ApprovalInfo message) throws ExecutionException, InterruptedException {

@@ -67,8 +67,10 @@ public class OrderApp implements InitializingBean {
      */
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(OrderApp.class);
+        ConfigurableApplicationContext applicationContext = app.run(args);
         DefaultProfileUtil.addDefaultProfile(app);
-        Environment env = app.run(args).getEnvironment();
+        applicationContext.getBean(KafkaMessagingService.class).startConsumers();
+        Environment env = applicationContext.getEnvironment();
         logApplicationStartup(env);
     }
 
