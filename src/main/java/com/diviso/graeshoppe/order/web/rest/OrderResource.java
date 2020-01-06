@@ -54,7 +54,7 @@ public class OrderResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new orderDTO, or with status {@code 400 (Bad Request)} if the order has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PostMapping("/orders")
+    //@PostMapping("/orders")
     public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderDTO orderDTO) throws URISyntaxException {
         log.debug("REST request to save Order : {}", orderDTO);
         if (orderDTO.getId() != null) {
@@ -75,7 +75,7 @@ public class OrderResource {
      * or with status {@code 500 (Internal Server Error)} if the orderDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("/orders")
+    //@PutMapping("/orders")
     public ResponseEntity<OrderDTO> updateOrder(@RequestBody OrderDTO orderDTO) throws URISyntaxException {
         log.debug("REST request to update Order : {}", orderDTO);
         if (orderDTO.getId() == null) {
@@ -95,7 +95,7 @@ public class OrderResource {
 
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of orders in body.
      */
-    @GetMapping("/orders")
+    //@GetMapping("/orders")
     public ResponseEntity<List<OrderDTO>> getAllOrders(Pageable pageable) {
         log.debug("REST request to get a page of Orders");
         Page<OrderDTO> page = orderService.findAll(pageable);
@@ -109,7 +109,7 @@ public class OrderResource {
      * @param id the id of the orderDTO to retrieve.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the orderDTO, or with status {@code 404 (Not Found)}.
      */
-    @GetMapping("/ordersget/{id}")
+   // @GetMapping("/ordersget/{id}")
     public ResponseEntity<OrderDTO> getOrder(@PathVariable Long id) {
         log.debug("REST request to get Order : {}", id);
         Optional<OrderDTO> orderDTO = orderService.findOne(id);
@@ -122,7 +122,7 @@ public class OrderResource {
      * @param id the id of the orderDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/orders/{id}")
+    //@DeleteMapping("/orders/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
         log.debug("REST request to delete Order : {}", id);
         orderService.delete(id);
@@ -137,7 +137,7 @@ public class OrderResource {
      * @param pageable the pagination information.
      * @return the result of the search.
      */
-    @GetMapping("/_search/orders")
+    //@GetMapping("/_search/orders")
     public ResponseEntity<List<OrderDTO>> searchOrders(@RequestParam String query, Pageable pageable) {
         log.debug("REST request to search for a page of Orders for query {}", query);
         Page<OrderDTO> page = orderService.search(query, pageable);
