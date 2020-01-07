@@ -414,7 +414,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 		notificationDTO.setDate(Instant.now());
 		notificationDTO.setTargetId(order.get().getOrderId());
 		notificationDTO.setType("Order-Delivered");
-		notificationService.save(notificationDTO);
-		notificationService.publishNotificationToMessageBroker(notificationDTO);
+		NotificationDTO result = notificationService.save(notificationDTO);
+		notificationService.publishNotificationToMessageBroker(result);
 	}
 }
