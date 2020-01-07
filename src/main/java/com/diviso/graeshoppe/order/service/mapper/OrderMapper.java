@@ -11,12 +11,14 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", uses = {DeliveryInfoMapper.class, ApprovalDetailsMapper.class, StatusMapper.class})
 public interface OrderMapper extends EntityMapper<OrderDTO, Order> {
 
-    @Mapping(source = "deliveryInfo.id", target = "deliveryInfoId")
+    @Override
+	@Mapping(source = "deliveryInfo.id", target = "deliveryInfoId")
     @Mapping(source = "approvalDetails.id", target = "approvalDetailsId")
     @Mapping(source = "status.id", target = "statusId")
     OrderDTO toDto(Order order);
 
-    @Mapping(source = "deliveryInfoId", target = "deliveryInfo")
+    @Override
+	@Mapping(source = "deliveryInfoId", target = "deliveryInfo")
     @Mapping(source = "approvalDetailsId", target = "approvalDetails")
     @Mapping(target = "orderLines", ignore = true)
     @Mapping(target = "removeOrderLines", ignore = true)

@@ -71,9 +71,11 @@ public class Offer extends org.apache.avro.specific.SpecificRecordBase implement
     this.discountAmount = discountAmount;
   }
 
-  public org.apache.avro.Schema getSchema() { return SCHEMA$; }
+  @Override
+public org.apache.avro.Schema getSchema() { return SCHEMA$; }
   // Used by DatumWriter.  Applications should not call.
-  public java.lang.Object get(int field$) {
+  @Override
+public java.lang.Object get(int field$) {
     switch (field$) {
     case 0: return offerRef;
     case 1: return discountAmount;
@@ -82,7 +84,8 @@ public class Offer extends org.apache.avro.specific.SpecificRecordBase implement
   }
 
   // Used by DatumReader.  Applications should not call.
-  @SuppressWarnings(value="unchecked")
+  @Override
+@SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
     case 0: offerRef = (java.lang.String)value$; break;
@@ -288,7 +291,7 @@ public class Offer extends org.apache.avro.specific.SpecificRecordBase implement
 
   @SuppressWarnings("unchecked")
   private static final org.apache.avro.io.DatumWriter<Offer>
-    WRITER$ = (org.apache.avro.io.DatumWriter<Offer>)MODEL$.createDatumWriter(SCHEMA$);
+    WRITER$ = MODEL$.createDatumWriter(SCHEMA$);
 
   @Override public void writeExternal(java.io.ObjectOutput out)
     throws java.io.IOException {
@@ -297,7 +300,7 @@ public class Offer extends org.apache.avro.specific.SpecificRecordBase implement
 
   @SuppressWarnings("unchecked")
   private static final org.apache.avro.io.DatumReader<Offer>
-    READER$ = (org.apache.avro.io.DatumReader<Offer>)MODEL$.createDatumReader(SCHEMA$);
+    READER$ = MODEL$.createDatumReader(SCHEMA$);
 
   @Override public void readExternal(java.io.ObjectInput in)
     throws java.io.IOException {

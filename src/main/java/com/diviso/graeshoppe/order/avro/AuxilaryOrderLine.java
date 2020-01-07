@@ -77,9 +77,11 @@ public class AuxilaryOrderLine extends org.apache.avro.specific.SpecificRecordBa
     this.total = total;
   }
 
-  public org.apache.avro.Schema getSchema() { return SCHEMA$; }
+  @Override
+public org.apache.avro.Schema getSchema() { return SCHEMA$; }
   // Used by DatumWriter.  Applications should not call.
-  public java.lang.Object get(int field$) {
+  @Override
+public java.lang.Object get(int field$) {
     switch (field$) {
     case 0: return productId;
     case 1: return quantity;
@@ -90,7 +92,8 @@ public class AuxilaryOrderLine extends org.apache.avro.specific.SpecificRecordBa
   }
 
   // Used by DatumReader.  Applications should not call.
-  @SuppressWarnings(value="unchecked")
+  @Override
+@SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
     case 0: productId = (java.lang.Long)value$; break;
@@ -425,7 +428,7 @@ public class AuxilaryOrderLine extends org.apache.avro.specific.SpecificRecordBa
 
   @SuppressWarnings("unchecked")
   private static final org.apache.avro.io.DatumWriter<AuxilaryOrderLine>
-    WRITER$ = (org.apache.avro.io.DatumWriter<AuxilaryOrderLine>)MODEL$.createDatumWriter(SCHEMA$);
+    WRITER$ = MODEL$.createDatumWriter(SCHEMA$);
 
   @Override public void writeExternal(java.io.ObjectOutput out)
     throws java.io.IOException {
@@ -434,7 +437,7 @@ public class AuxilaryOrderLine extends org.apache.avro.specific.SpecificRecordBa
 
   @SuppressWarnings("unchecked")
   private static final org.apache.avro.io.DatumReader<AuxilaryOrderLine>
-    READER$ = (org.apache.avro.io.DatumReader<AuxilaryOrderLine>)MODEL$.createDatumReader(SCHEMA$);
+    READER$ = MODEL$.createDatumReader(SCHEMA$);
 
   @Override public void readExternal(java.io.ObjectInput in)
     throws java.io.IOException {

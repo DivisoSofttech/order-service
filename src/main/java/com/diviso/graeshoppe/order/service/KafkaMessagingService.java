@@ -1,7 +1,6 @@
 package com.diviso.graeshoppe.order.service;
 
 import com.diviso.graeshoppe.notification.avro.Notification;
-import com.diviso.graeshoppe.order.avro.ApprovalDetails;
 import com.diviso.graeshoppe.order.avro.ApprovalInfo;
 import com.diviso.graeshoppe.order.avro.Order;
 import com.diviso.graeshoppe.payment.avro.Payment;
@@ -10,7 +9,6 @@ import com.diviso.graeshoppe.order.config.KafkaProperties;
 import com.diviso.graeshoppe.order.models.OpenTask;
 import com.diviso.graeshoppe.order.service.dto.OrderDTO;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -98,7 +96,6 @@ public class KafkaMessagingService {
 					records.forEach(record -> {
 						log.info("Record payment consumed is " + record.value());
 						Payment payment = record.value();
-						System.out.println("Order Command Service is " + orderCommandService);
 						updateOrder(payment);
 					});
 
@@ -108,11 +105,9 @@ public class KafkaMessagingService {
 					ex.printStackTrace();
 				}
 			}
-			System.out.println("Out of the loop Consumer is going to close" + !exitLoop);
+			log.info("Out of the loop Consumer is going to close" + !exitLoop);
 			consumer.close();
 		});
-
-		// paymentThread.start();
 	}
 
 	public static class PublishResult {

@@ -6,6 +6,7 @@ import com.diviso.graeshoppe.order.service.OrderQueryService;
 import com.diviso.graeshoppe.order.service.UniqueOrderIDService;
 import com.diviso.graeshoppe.order.service.UserService;
 import com.diviso.graeshoppe.order.service.KafkaMessagingService.PublishResult;
+import com.diviso.graeshoppe.order.service.NotificationCommandService;
 import com.diviso.graeshoppe.order.avro.Address;
 import com.diviso.graeshoppe.order.avro.ApprovalDetails;
 import com.diviso.graeshoppe.order.avro.DeliveryInfo;
@@ -21,7 +22,6 @@ import com.diviso.graeshoppe.order.client.bpmn.model.RestFormProperty;
 import com.diviso.graeshoppe.order.client.bpmn.model.RestVariable;
 import com.diviso.graeshoppe.order.client.bpmn.model.SubmitFormRequest;
 import com.diviso.graeshoppe.order.client.customer.api.CustomerResourceApi;
-import com.diviso.graeshoppe.order.client.customer.model.Customer;
 import com.diviso.graeshoppe.order.client.store.api.StoreResourceApi;
 import com.diviso.graeshoppe.order.domain.AuxilaryOrderLine;
 import com.diviso.graeshoppe.order.domain.Offer;
@@ -33,6 +33,7 @@ import com.diviso.graeshoppe.order.repository.OrderRepository;
 import com.diviso.graeshoppe.order.repository.search.OrderSearchRepository;
 import com.diviso.graeshoppe.order.resource.assembler.CommandResource;
 import com.diviso.graeshoppe.order.resource.assembler.ResourceAssembler;
+import com.diviso.graeshoppe.order.service.dto.NotificationDTO;
 import com.diviso.graeshoppe.order.service.dto.OrderDTO;
 import com.diviso.graeshoppe.order.service.dto.UniqueOrderIDDTO;
 import com.diviso.graeshoppe.order.service.mapper.OrderMapper;
@@ -48,6 +49,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -73,6 +75,8 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
 	private final OfferRepository offerRepository;
 
+	@Autowired
+	private NotificationCommandService notificationService;
 	@Autowired
 	private OrderQueryService orderQueryService;
 	@Autowired
@@ -393,5 +397,24 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 	public Optional<OrderDTO> findByOrderID(String orderId) {
 
 		return orderRepository.findByOrderId(orderId).map(orderMapper::toDto);
+	}
+
+	@Override
+	public void markOrderAsDelivered(String orderId) {
+		Optional<OrderDTO> order = findByOrderID(orderId);
+		if(order.isPresent()) {
+			order.get().setStatusId(5l);
+		}
+		update(order.get());
+		NotificationDTO notificationDTO=new NotificationDTO();
+		notificationDTO.setTitle("Order Delivered");
+		notificationDTO.setMessage("Hi, Your order has been delivered successfuly!");
+		notificationDTO.setReceiverId(order.get().getCustomerId());
+		notificationDTO.setStatus("unread");
+		notificationDTO.setDate(Instant.now());
+		notificationDTO.setTargetId(order.get().getOrderId());
+		notificationDTO.setType("Order-Delivered");
+		notificationService.save(notificationDTO);
+		notificationService.publishNotificationToMessageBroker(notificationDTO);
 	}
 }

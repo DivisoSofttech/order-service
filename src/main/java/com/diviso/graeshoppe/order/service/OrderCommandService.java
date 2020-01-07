@@ -59,5 +59,6 @@ public interface OrderCommandService {
 	OrderDTO update(OrderDTO orderDTO);
 	
 	Optional<OrderDTO> findByOrderID(String orderId);
+	void markOrderAsDelivered(String orderId);
 	
 }

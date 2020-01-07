@@ -101,9 +101,11 @@ public class Address extends org.apache.avro.specific.SpecificRecordBase impleme
     this.alternatePhone = alternatePhone;
   }
 
-  public org.apache.avro.Schema getSchema() { return SCHEMA$; }
+  @Override
+public org.apache.avro.Schema getSchema() { return SCHEMA$; }
   // Used by DatumWriter.  Applications should not call.
-  public java.lang.Object get(int field$) {
+  @Override
+public java.lang.Object get(int field$) {
     switch (field$) {
     case 0: return customerId;
     case 1: return pincode;
@@ -122,7 +124,8 @@ public class Address extends org.apache.avro.specific.SpecificRecordBase impleme
   }
 
   // Used by DatumReader.  Applications should not call.
-  @SuppressWarnings(value="unchecked")
+  @Override
+@SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
     case 0: customerId = (java.lang.String)value$; break;
@@ -988,7 +991,7 @@ public class Address extends org.apache.avro.specific.SpecificRecordBase impleme
 
   @SuppressWarnings("unchecked")
   private static final org.apache.avro.io.DatumWriter<Address>
-    WRITER$ = (org.apache.avro.io.DatumWriter<Address>)MODEL$.createDatumWriter(SCHEMA$);
+    WRITER$ = MODEL$.createDatumWriter(SCHEMA$);
 
   @Override public void writeExternal(java.io.ObjectOutput out)
     throws java.io.IOException {
@@ -997,7 +1000,7 @@ public class Address extends org.apache.avro.specific.SpecificRecordBase impleme
 
   @SuppressWarnings("unchecked")
   private static final org.apache.avro.io.DatumReader<Address>
-    READER$ = (org.apache.avro.io.DatumReader<Address>)MODEL$.createDatumReader(SCHEMA$);
+    READER$ = MODEL$.createDatumReader(SCHEMA$);
 
   @Override public void readExternal(java.io.ObjectInput in)
     throws java.io.IOException {

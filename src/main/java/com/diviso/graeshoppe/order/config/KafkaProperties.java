@@ -3,8 +3,6 @@ package com.diviso.graeshoppe.order.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
-
 import java.util.HashMap;
 import java.util.Map;
 

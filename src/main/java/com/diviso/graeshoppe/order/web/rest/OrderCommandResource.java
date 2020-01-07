@@ -157,4 +157,8 @@ public class OrderCommandResource {
 	 orderService.publishMesssage(orderId);
     }
    
+   @PostMapping("/markAsDelivered/{orderId}")
+   public void markOrderAsDelivered(@PathVariable String orderId) {
+	   orderService.markOrderAsDelivered(orderId);
+   }
 }

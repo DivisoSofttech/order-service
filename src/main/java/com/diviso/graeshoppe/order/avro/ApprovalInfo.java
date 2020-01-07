@@ -74,9 +74,11 @@ public class ApprovalInfo extends org.apache.avro.specific.SpecificRecordBase im
     this.expectedDelivery = expectedDelivery;
   }
 
-  public org.apache.avro.Schema getSchema() { return SCHEMA$; }
+  @Override
+public org.apache.avro.Schema getSchema() { return SCHEMA$; }
   // Used by DatumWriter.  Applications should not call.
-  public java.lang.Object get(int field$) {
+  @Override
+public java.lang.Object get(int field$) {
     switch (field$) {
     case 0: return orderId;
     case 1: return acceptedAt;
@@ -86,7 +88,8 @@ public class ApprovalInfo extends org.apache.avro.specific.SpecificRecordBase im
   }
 
   // Used by DatumReader.  Applications should not call.
-  @SuppressWarnings(value="unchecked")
+  @Override
+@SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
     case 0: orderId = (java.lang.String)value$; break;
@@ -357,7 +360,7 @@ public class ApprovalInfo extends org.apache.avro.specific.SpecificRecordBase im
 
   @SuppressWarnings("unchecked")
   private static final org.apache.avro.io.DatumWriter<ApprovalInfo>
-    WRITER$ = (org.apache.avro.io.DatumWriter<ApprovalInfo>)MODEL$.createDatumWriter(SCHEMA$);
+    WRITER$ = MODEL$.createDatumWriter(SCHEMA$);
 
   @Override public void writeExternal(java.io.ObjectOutput out)
     throws java.io.IOException {
@@ -366,7 +369,7 @@ public class ApprovalInfo extends org.apache.avro.specific.SpecificRecordBase im
 
   @SuppressWarnings("unchecked")
   private static final org.apache.avro.io.DatumReader<ApprovalInfo>
-    READER$ = (org.apache.avro.io.DatumReader<ApprovalInfo>)MODEL$.createDatumReader(SCHEMA$);
+    READER$ = MODEL$.createDatumReader(SCHEMA$);
 
   @Override public void readExternal(java.io.ObjectInput in)
     throws java.io.IOException {
