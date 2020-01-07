@@ -30,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -96,7 +97,19 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		ApprovalDetailsDTO result = approvalDetailsMapper.toDto(approvalDetails);
 		approvalDetailsSearchRepository.save(approvalDetails);
 		OrderDTO orderDTO = orderService.findByOrderID(approvalDetailsDTO.getOrderId()).get();
-		CommandResource result1 = acceptOrder(approvalDetailsDTO, taskId,orderDTO.getPreOrderDate(),orderDTO.getProcessId());
+		String stringDate = null;
+		if (approvalDetailsDTO.getExpectedDelivery() != null) {
+			log.info("Expected delivery will be deliverytime");
+			stringDate = Date.from(approvalDetailsDTO.getExpectedDelivery()).toString();
+		} else if(orderDTO.getPreOrderDate()!=null){
+			log.info("Preorder date will be delivery time");
+			stringDate = Date.from(orderDTO.getPreOrderDate()).toString();
+		}else {
+			log.info("Expected DeliveryTime will be the date of order + 40 minutes");
+			stringDate = Date.from(orderDTO.getDate().plus(Duration.ofMinutes(40))).toString();
+
+		}
+		CommandResource result1 = acceptOrder(approvalDetailsDTO, taskId,stringDate,orderDTO.getProcessId());
 		result1.setSelfId(result.getId());
 		NotificationDTO notificationDTO = new NotificationDTO();
 		notificationDTO.setDate(approvalDetailsDTO.getAcceptedAt());
@@ -133,7 +146,7 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		return result1;
 	}
 
-	public CommandResource acceptOrder(ApprovalDetailsDTO acceptOrderRequest, String taskId,Instant preOrderDate, String processInstanceId) {
+	public CommandResource acceptOrder(ApprovalDetailsDTO acceptOrderRequest, String taskId,String expectedDeliveryTime, String processInstanceId) {
 
 		log.info("ProcessInstanceId is+ " + processInstanceId);
 		SubmitFormRequest formRequest = new SubmitFormRequest();
@@ -145,16 +158,9 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		decision.setValue(acceptOrderRequest.getDecision());
 		properties.add(decision);
 
-		String stringDate = null;
-		if (acceptOrderRequest.getExpectedDelivery() != null) {
-			log.info("Expected delivery will be deliverytime");
-			stringDate = Date.from(acceptOrderRequest.getExpectedDelivery()).toString();
-		} else {
-			log.info("Preorder date will be delivery time");
-			stringDate = Date.from(preOrderDate).toString();
-		}
-		String date = stringDate.substring(4, 10);
-		String time = stringDate.substring(11, 16);
+		
+		String date = expectedDeliveryTime.substring(4, 10);
+		String time = expectedDeliveryTime.substring(11, 16);
 		RestFormProperty deliveryTime = new RestFormProperty();
 		deliveryTime.setId("deliveryTime");
 		deliveryTime.setName("deliveryTime");
