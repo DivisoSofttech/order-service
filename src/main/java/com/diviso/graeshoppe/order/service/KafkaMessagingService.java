@@ -144,7 +144,6 @@ public class KafkaMessagingService {
 				orderDTO.get().setAcceptOrderId(openTask.getTaskId());
 				orderCommandService.update(orderDTO.get());
 				log.info("Order updated with payment ref" + payment.getTargetId());
-				orderCommandService.publishMesssage(payment.getTargetId());
 			}
 
 		});
