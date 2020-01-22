@@ -38,6 +38,8 @@ public class OrderDTO implements Serializable {
 
     private String processId;
 
+    private Long cancellationRef;
+
 
     private Long deliveryInfoId;
 
@@ -165,6 +167,14 @@ public class OrderDTO implements Serializable {
         this.processId = processId;
     }
 
+    public Long getCancellationRef() {
+        return cancellationRef;
+    }
+
+    public void setCancellationRef(Long cancellationRef) {
+        this.cancellationRef = cancellationRef;
+    }
+
     public Long getDeliveryInfoId() {
         return deliveryInfoId;
     }
@@ -228,6 +238,7 @@ public class OrderDTO implements Serializable {
             ", timeZone='" + getTimeZone() + "'" +
             ", acceptOrderId='" + getAcceptOrderId() + "'" +
             ", processId='" + getProcessId() + "'" +
+            ", cancellationRef=" + getCancellationRef() +
             ", deliveryInfoId=" + getDeliveryInfoId() +
             ", approvalDetailsId=" + getApprovalDetailsId() +
             ", statusId=" + getStatusId() +

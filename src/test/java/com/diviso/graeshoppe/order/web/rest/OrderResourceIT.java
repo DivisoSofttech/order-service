@@ -87,6 +87,9 @@ public class OrderResourceIT {
     private static final String DEFAULT_PROCESS_ID = "AAAAAAAAAA";
     private static final String UPDATED_PROCESS_ID = "BBBBBBBBBB";
 
+    private static final Long DEFAULT_CANCELLATION_REF = 1L;
+    private static final Long UPDATED_CANCELLATION_REF = 2L;
+
     @Autowired
     private OrderRepository orderRepository;
 
@@ -156,7 +159,8 @@ public class OrderResourceIT {
             .email(DEFAULT_EMAIL)
             .timeZone(DEFAULT_TIME_ZONE)
             .acceptOrderId(DEFAULT_ACCEPT_ORDER_ID)
-            .processId(DEFAULT_PROCESS_ID);
+            .processId(DEFAULT_PROCESS_ID)
+            .cancellationRef(DEFAULT_CANCELLATION_REF);
         return order;
     }
     /**
@@ -180,7 +184,8 @@ public class OrderResourceIT {
             .email(UPDATED_EMAIL)
             .timeZone(UPDATED_TIME_ZONE)
             .acceptOrderId(UPDATED_ACCEPT_ORDER_ID)
-            .processId(UPDATED_PROCESS_ID);
+            .processId(UPDATED_PROCESS_ID)
+            .cancellationRef(UPDATED_CANCELLATION_REF);
         return order;
     }
 
@@ -219,6 +224,7 @@ public class OrderResourceIT {
         assertThat(testOrder.getTimeZone()).isEqualTo(DEFAULT_TIME_ZONE);
         assertThat(testOrder.getAcceptOrderId()).isEqualTo(DEFAULT_ACCEPT_ORDER_ID);
         assertThat(testOrder.getProcessId()).isEqualTo(DEFAULT_PROCESS_ID);
+        assertThat(testOrder.getCancellationRef()).isEqualTo(DEFAULT_CANCELLATION_REF);
 
         // Validate the Order in Elasticsearch
         verify(mockOrderSearchRepository, times(1)).save(testOrder);
@@ -272,7 +278,8 @@ public class OrderResourceIT {
             .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL)))
             .andExpect(jsonPath("$.[*].timeZone").value(hasItem(DEFAULT_TIME_ZONE)))
             .andExpect(jsonPath("$.[*].acceptOrderId").value(hasItem(DEFAULT_ACCEPT_ORDER_ID)))
-            .andExpect(jsonPath("$.[*].processId").value(hasItem(DEFAULT_PROCESS_ID)));
+            .andExpect(jsonPath("$.[*].processId").value(hasItem(DEFAULT_PROCESS_ID)))
+            .andExpect(jsonPath("$.[*].cancellationRef").value(hasItem(DEFAULT_CANCELLATION_REF.intValue())));
     }
     
     @Test
@@ -299,7 +306,8 @@ public class OrderResourceIT {
             .andExpect(jsonPath("$.email").value(DEFAULT_EMAIL))
             .andExpect(jsonPath("$.timeZone").value(DEFAULT_TIME_ZONE))
             .andExpect(jsonPath("$.acceptOrderId").value(DEFAULT_ACCEPT_ORDER_ID))
-            .andExpect(jsonPath("$.processId").value(DEFAULT_PROCESS_ID));
+            .andExpect(jsonPath("$.processId").value(DEFAULT_PROCESS_ID))
+            .andExpect(jsonPath("$.cancellationRef").value(DEFAULT_CANCELLATION_REF.intValue()));
     }
 
     @Test
@@ -336,7 +344,8 @@ public class OrderResourceIT {
             .email(UPDATED_EMAIL)
             .timeZone(UPDATED_TIME_ZONE)
             .acceptOrderId(UPDATED_ACCEPT_ORDER_ID)
-            .processId(UPDATED_PROCESS_ID);
+            .processId(UPDATED_PROCESS_ID)
+            .cancellationRef(UPDATED_CANCELLATION_REF);
         OrderDTO orderDTO = orderMapper.toDto(updatedOrder);
 
         restOrderMockMvc.perform(put("/api/orders")
@@ -362,6 +371,7 @@ public class OrderResourceIT {
         assertThat(testOrder.getTimeZone()).isEqualTo(UPDATED_TIME_ZONE);
         assertThat(testOrder.getAcceptOrderId()).isEqualTo(UPDATED_ACCEPT_ORDER_ID);
         assertThat(testOrder.getProcessId()).isEqualTo(UPDATED_PROCESS_ID);
+        assertThat(testOrder.getCancellationRef()).isEqualTo(UPDATED_CANCELLATION_REF);
 
         // Validate the Order in Elasticsearch
         verify(mockOrderSearchRepository, times(1)).save(testOrder);
@@ -435,6 +445,7 @@ public class OrderResourceIT {
             .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL)))
             .andExpect(jsonPath("$.[*].timeZone").value(hasItem(DEFAULT_TIME_ZONE)))
             .andExpect(jsonPath("$.[*].acceptOrderId").value(hasItem(DEFAULT_ACCEPT_ORDER_ID)))
-            .andExpect(jsonPath("$.[*].processId").value(hasItem(DEFAULT_PROCESS_ID)));
+            .andExpect(jsonPath("$.[*].processId").value(hasItem(DEFAULT_PROCESS_ID)))
+            .andExpect(jsonPath("$.[*].cancellationRef").value(hasItem(DEFAULT_CANCELLATION_REF.intValue())));
     }
 }

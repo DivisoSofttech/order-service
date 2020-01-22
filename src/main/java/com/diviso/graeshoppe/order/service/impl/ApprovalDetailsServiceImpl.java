@@ -116,14 +116,17 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		if (approvalDetailsDTO.getDecision().equals("accepted")) {
 			notificationDTO.setMessage("Your Order has been accepted cheers");
 			notificationDTO.setTitle("Order Accepted");
+			notificationDTO.setType("Order-Approved");
+
 		} else {
 			notificationDTO.setMessage("Sorry Your Order has been rejected");
 			notificationDTO.setTitle("Order Rejected");
+			notificationDTO.setType("Order-Rejected");
+
 		}
 		notificationDTO.setTargetId(approvalDetailsDTO.getOrderId());
 		notificationDTO.setStatus("unread");
 		notificationDTO.setReceiverId(orderDTO.getCustomerId());
-		notificationDTO.setType("Approved-Notification");
 		NotificationDTO resultNotification = notificationService.save(notificationDTO); // sending notifications from
 																						// here to the customer
 		notificationService.publishNotificationToMessageBroker(resultNotification);

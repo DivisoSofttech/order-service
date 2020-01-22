@@ -5,6 +5,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.HashSet;
@@ -23,6 +24,7 @@ public class Order implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @org.springframework.data.elasticsearch.annotations.Field(type = FieldType.Keyword)
     private Long id;
 
     @Column(name = "order_id")
@@ -66,6 +68,9 @@ public class Order implements Serializable {
 
     @Column(name = "process_id")
     private String processId;
+
+    @Column(name = "cancellation_ref")
+    private Long cancellationRef;
 
     @OneToOne
     @JoinColumn(unique = true)
@@ -278,6 +283,19 @@ public class Order implements Serializable {
         this.processId = processId;
     }
 
+    public Long getCancellationRef() {
+        return cancellationRef;
+    }
+
+    public Order cancellationRef(Long cancellationRef) {
+        this.cancellationRef = cancellationRef;
+        return this;
+    }
+
+    public void setCancellationRef(Long cancellationRef) {
+        this.cancellationRef = cancellationRef;
+    }
+
     public DeliveryInfo getDeliveryInfo() {
         return deliveryInfo;
     }
@@ -402,6 +420,7 @@ public class Order implements Serializable {
             ", timeZone='" + getTimeZone() + "'" +
             ", acceptOrderId='" + getAcceptOrderId() + "'" +
             ", processId='" + getProcessId() + "'" +
+            ", cancellationRef=" + getCancellationRef() +
             "}";
     }
 }

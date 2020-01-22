@@ -1,5 +1,6 @@
 package com.diviso.graeshoppe.order.service;
 
+import com.diviso.graeshoppe.avro.*;
 import com.diviso.graeshoppe.notification.avro.Notification;
 import com.diviso.graeshoppe.order.avro.ApprovalInfo;
 import com.diviso.graeshoppe.order.avro.Order;
@@ -40,11 +41,14 @@ public class KafkaMessagingService {
 	private String approvaldetailsTopic;
 	@Value("${topic.payment.destination}")
 	private String paymentTopic;
+	@Value("${topic.cancellation.destination}")
+	private String cancellationTopic;
+	@Value("${topic.refund.destination}")
+	private String refundTopic;
 
 	@Autowired
-	private  OrderCommandService orderCommandService;
+	private OrderCommandService orderCommandService;
 
-	
 	private final OrderQueryService orderQueryService;
 
 	@Value("${topic.notification.destination}")
@@ -56,7 +60,7 @@ public class KafkaMessagingService {
 
 	private ExecutorService sseExecutorService = Executors.newCachedThreadPool();
 
-	public KafkaMessagingService(OrderQueryService orderQueryService,KafkaProperties kafkaProperties) {
+	public KafkaMessagingService(OrderQueryService orderQueryService, KafkaProperties kafkaProperties) {
 		this.kafkaProperties = kafkaProperties;
 		this.orderQueryService = orderQueryService;
 		this.orderProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
@@ -83,6 +87,58 @@ public class KafkaMessagingService {
 				Instant.ofEpochMilli(metadata.timestamp()));
 	}
 
+	public void subscribeCancellation() {
+		Map<String, Object> consumerProps = kafkaProperties.getConsumerProps();
+		sseExecutorService.execute(() -> {
+			KafkaConsumer<String, CancellationRequest> consumer = new KafkaConsumer<>(consumerProps);
+			consumer.subscribe(Collections.singletonList(cancellationTopic));
+			boolean exitLoop = false;
+			while (!exitLoop) {
+				try {
+					ConsumerRecords<String, CancellationRequest> records = consumer.poll(Duration.ofSeconds(3));
+					records.forEach(record -> {
+						log.info("Record cancellationrequest consumed is " + record.value());
+						CancellationRequest cancellationRequest = record.value();
+						updateOrder(cancellationRequest);
+					});
+
+				} catch (Exception ex) {
+					log.trace("Complete with error cancellationTopic {}", ex.getMessage(), ex);
+					exitLoop = true;
+					ex.printStackTrace();
+				}
+			}
+			log.info("Out of the loop Consumer is going to close" + !exitLoop);
+			consumer.close();
+		});
+	}
+
+	public void subscribeRefundDetails() {
+		Map<String, Object> consumerProps = kafkaProperties.getConsumerProps();
+		sseExecutorService.execute(() -> {
+			KafkaConsumer<String, RefundDetails> consumer = new KafkaConsumer<>(consumerProps);
+			consumer.subscribe(Collections.singletonList(refundTopic));
+			boolean exitLoop = false;
+			while (!exitLoop) {
+				try {
+					ConsumerRecords<String, RefundDetails> records = consumer.poll(Duration.ofSeconds(3));
+					records.forEach(record -> {
+						log.info("Record refundDetails consumed is " + record.value());
+						RefundDetails refundDetails = record.value();
+						updateOrder(refundDetails);
+					});
+
+				} catch (Exception ex) {
+					log.trace("Complete with error refundTopic {}", ex.getMessage(), ex);
+					exitLoop = true;
+					ex.printStackTrace();
+				}
+			}
+			log.info("Out of the loop Consumer is going to close" + !exitLoop);
+			consumer.close();
+		});
+	}
+
 	public void subscribePayment() {
 		Map<String, Object> consumerProps = kafkaProperties.getConsumerProps();
 		sseExecutorService.execute(() -> {
@@ -100,7 +156,7 @@ public class KafkaMessagingService {
 					});
 
 				} catch (Exception ex) {
-					log.trace("Complete with error {}", ex.getMessage(), ex);
+					log.trace("Complete with error paymentTopic {}", ex.getMessage(), ex);
 					exitLoop = true;
 					ex.printStackTrace();
 				}
@@ -125,7 +181,6 @@ public class KafkaMessagingService {
 	}
 
 	public void updateOrder(Payment payment) {
-
 		CompletableFuture.runAsync(() -> {
 			Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(payment.getTargetId());
 			if (orderDTO.isPresent()) {
@@ -144,8 +199,33 @@ public class KafkaMessagingService {
 		});
 	}
 
-	public void startConsumers() {
+	private void updateOrder(CancellationRequest cancellationRequest) {
+		CompletableFuture.runAsync(() -> {
+			Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(cancellationRequest.getOrderId());
+			if (orderDTO.isPresent()) {
+				orderDTO.get().setStatusId(8l); // cancellation-requested
+				orderDTO.get().setCancellationRef(cancellationRequest.getId());
+				orderCommandService.update(orderDTO.get());
+				log.info("Order is updated after cancellation with ref " + cancellationRequest.getId());
+			}
 
+		});
+	}
+
+	private void updateOrder(RefundDetails refundDetails) {
+		CompletableFuture.runAsync(() -> {
+			Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(refundDetails.getOrderId());
+			if (orderDTO.isPresent()) {
+				orderDTO.get().setStatusId(9l); // refund-completed
+				orderCommandService.update(orderDTO.get());
+				log.info("Order is updated after refund with ref " + refundDetails.getOrderId());
+			}
+		});
+	}
+
+	public void startConsumers() {
 		subscribePayment();
+		subscribeCancellation();
+		subscribeRefundDetails();
 	}
 }

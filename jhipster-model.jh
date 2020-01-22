@@ -13,6 +13,7 @@ entity Order{
 	timeZone String,
 	acceptOrderId String,
 	processId String,
+	cancellationRef Long
 }
 entity DeliveryInfo{
 	deliveryType String,

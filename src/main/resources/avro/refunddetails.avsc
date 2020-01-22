@@ -1,0 +1,11 @@
+  
+  {
+	"namespace":"com.diviso.graeshoppe.avro",
+	"name":"RefundDetails",
+	"type":"record",
+	"fields":[
+	    {"name":"status","type":["null","string"]},
+		{"name":"orderId","type":["null","string"]},
+		{"name":"refundId","type":["null","string"]}
+		]
+	}
