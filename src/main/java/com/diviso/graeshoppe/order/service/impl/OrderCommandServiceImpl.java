@@ -277,12 +277,13 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
 	@Override
 	public void publishMesssage(String orderId) {
-		CompletableFuture.runAsync(() -> {
 			boolean isOrderExists = true;
 			while (isOrderExists) {
+				log.info("In while method ");
 				Optional<Order> orderOptional = orderRepository.findByOrderIdAndStatus_Name(orderId,
 						"payment-processed-unapproved");
 				if (orderOptional.isPresent()) {
+					log.info("Order is present");
 					Long phone = 0l;
 					Order order = orderOptional.get();
 					isOrderExists = false;
@@ -391,16 +392,8 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 						log.error("Error sending avro message " + e.getMessage());
 
 					}
-				} else {
-					try {
-						Thread.sleep(500l);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
+				} 
 			}
-		});
 	}
 
 	private com.diviso.graeshoppe.order.avro.OrderLine toAvroOrderLine(OrderLine orderline) {
