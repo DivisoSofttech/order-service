@@ -88,6 +88,7 @@ public class KafkaMessagingService {
 	}
 
 	public void subscribeCancellation() {
+		log.info("Subscribing to cancellation");
 		Map<String, Object> consumerProps = kafkaProperties.getConsumerProps();
 		sseExecutorService.execute(() -> {
 			KafkaConsumer<String, CancellationRequest> consumer = new KafkaConsumer<>(consumerProps);
@@ -114,6 +115,7 @@ public class KafkaMessagingService {
 	}
 
 	public void subscribeRefundDetails() {
+		log.info("Subscribing to refunddetails");
 		Map<String, Object> consumerProps = kafkaProperties.getConsumerProps();
 		sseExecutorService.execute(() -> {
 			KafkaConsumer<String, RefundDetails> consumer = new KafkaConsumer<>(consumerProps);
