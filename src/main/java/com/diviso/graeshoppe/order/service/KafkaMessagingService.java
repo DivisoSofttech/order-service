@@ -4,6 +4,7 @@ import com.diviso.graeshoppe.avro.*;
 import com.diviso.graeshoppe.notification.avro.Notification;
 import com.diviso.graeshoppe.order.avro.ApprovalInfo;
 import com.diviso.graeshoppe.order.avro.Order;
+import com.diviso.graeshoppe.order.avro.OrderState;
 import com.diviso.graeshoppe.payment.avro.Payment;
 
 import com.diviso.graeshoppe.order.config.KafkaProperties;
@@ -45,6 +46,8 @@ public class KafkaMessagingService {
 	private String cancellationTopic;
 	@Value("${topic.refund.destination}")
 	private String refundTopic;
+	@Value("${topic.orderstate.destination}")
+	private String orderStateTopic;
 
 	@Autowired
 	private OrderCommandService orderCommandService;
@@ -57,6 +60,7 @@ public class KafkaMessagingService {
 	private KafkaProducer<String, Order> orderProducer;
 	private KafkaProducer<String, Notification> notificatonProducer;
 	private KafkaProducer<String, ApprovalInfo> approvalDetailsProducer;
+	private KafkaProducer<String, OrderState> orderStateProducer;
 
 	private ExecutorService sseExecutorService = Executors.newCachedThreadPool();
 
@@ -66,11 +70,19 @@ public class KafkaMessagingService {
 		this.orderProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
 		this.notificatonProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
 		this.approvalDetailsProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
+		this.orderStateProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
+
 	}
 
 	public PublishResult publishApprovalDetails(ApprovalInfo message) throws ExecutionException, InterruptedException {
 		RecordMetadata metadata = approvalDetailsProducer.send(new ProducerRecord<>(approvaldetailsTopic, message))
 				.get();
+		return new PublishResult(metadata.topic(), metadata.partition(), metadata.offset(),
+				Instant.ofEpochMilli(metadata.timestamp()));
+	}
+
+	public PublishResult publishOrderState(OrderState message) throws ExecutionException, InterruptedException {
+		RecordMetadata metadata = orderStateProducer.send(new ProducerRecord<>(orderStateTopic, message)).get();
 		return new PublishResult(metadata.topic(), metadata.partition(), metadata.offset(),
 				Instant.ofEpochMilli(metadata.timestamp()));
 	}

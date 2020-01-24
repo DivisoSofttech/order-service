@@ -11,6 +11,7 @@ import com.diviso.graeshoppe.order.avro.Address;
 import com.diviso.graeshoppe.order.avro.ApprovalDetails;
 import com.diviso.graeshoppe.order.avro.DeliveryInfo;
 import com.diviso.graeshoppe.order.avro.Order.Builder;
+import com.diviso.graeshoppe.order.avro.OrderState;
 import com.diviso.graeshoppe.order.avro.Status;
 import com.diviso.graeshoppe.order.client.bpmn.api.FormsApi;
 import com.diviso.graeshoppe.order.client.bpmn.api.ProcessInstancesApi;
@@ -277,123 +278,120 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
 	@Override
 	public void publishMesssage(String orderId) {
-			boolean isOrderExists = true;
-			while (isOrderExists) {
-				log.info("In while method ");
-				Optional<Order> orderOptional = orderRepository.findByOrderIdAndStatus_Name(orderId,
-						"payment-processed-unapproved");
-				if (orderOptional.isPresent()) {
-					log.info("Order is present");
-					Long phone = 0l;
-					Order order = orderOptional.get();
-					isOrderExists = false;
-					com.diviso.graeshoppe.order.domain.DeliveryInfo deliveryInfo = orderQueryService
-							.findDeliveryInfoByOrderId(orderId);
-					if (deliveryInfo != null) {
-						if (deliveryInfo.getDeliveryAddress() != null) {
-							com.diviso.graeshoppe.order.domain.Address address = deliveryInfo.getDeliveryAddress();
-							if (address.getPhone() != null) {
-								phone = address.getPhone();
-							}
+		boolean isOrderExists = true;
+		while (isOrderExists) {
+			log.info("In while method ");
+			Optional<Order> orderOptional = orderRepository.findByOrderIdAndStatus_Name(orderId,
+					"payment-processed-unapproved");
+			if (orderOptional.isPresent()) {
+				log.info("Order is present");
+				Long phone = 0l;
+				Order order = orderOptional.get();
+				isOrderExists = false;
+				com.diviso.graeshoppe.order.domain.DeliveryInfo deliveryInfo = orderQueryService
+						.findDeliveryInfoByOrderId(orderId);
+				if (deliveryInfo != null) {
+					if (deliveryInfo.getDeliveryAddress() != null) {
+						com.diviso.graeshoppe.order.domain.Address address = deliveryInfo.getDeliveryAddress();
+						if (address.getPhone() != null) {
+							phone = address.getPhone();
 						}
 					}
-					log.info("Phone number is publishing to kafka " + phone);
-					order.setOrderLines(orderLineRepository.findByOrder_OrderId(order.getOrderId()));
-					order.setAppliedOffers(offerRepository.findByOrder_Id(order.getId()));
-					log.info("Applied offers in order is " + order.getAppliedOffers());
-					long restaurantCount = orderRepository.countByStoreIdAndCustomerId(order.getStoreId(),
-							order.getCustomerId());
-					long graeshoppeCount = orderRepository.countByCustomerId(order.getCustomerId());
-					log.info("Order fetched from db is  " + order);
-					log.info("restaurant total count is " + restaurantCount + " Graeshoppe total count "
-							+ graeshoppeCount);
-					Builder orderAvro = com.diviso.graeshoppe.order.avro.Order.newBuilder()
-							.setOrderId(order.getOrderId()).setAllergyNote(order.getAllergyNote())
-							.setEventType("CREATE").setCustomerId(order.getCustomerId()).setStoreId(order.getStoreId())
-							.setPaymentRef(order.getPaymentRef()).setCustomerPhone(phone)
-							.setOrderCountgraeshoppe(graeshoppeCount).setOrderCountRestaurant(restaurantCount)
-							.setGrandTotal(order.getGrandTotal()).setSubTotal(order.getSubTotal())
-							.setEmail(order.getEmail()).setPaymentMode(order.getPaymentMode())
-							.setPaymentRef(order.getPaymentRef()).setTimeZone(order.getTimeZone())
-							.setStatus(Status.newBuilder().setId(order.getStatus().getId())
-									.setName(order.getStatus().getName()).build())
-							.setOrderLines(order.getOrderLines().stream().map(this::toAvroOrderLine)
-									.collect(Collectors.toList()));
-					if (order.getPreOrderDate() != null) {
-						orderAvro.setPreOrderDate(order.getPreOrderDate().toEpochMilli());
-					}
-					if (order.getDate() != null) {
-						orderAvro.setDate(order.getDate().toEpochMilli());
+				}
+				log.info("Phone number is publishing to kafka " + phone);
+				order.setOrderLines(orderLineRepository.findByOrder_OrderId(order.getOrderId()));
+				order.setAppliedOffers(offerRepository.findByOrder_Id(order.getId()));
+				log.info("Applied offers in order is " + order.getAppliedOffers());
+				long restaurantCount = orderRepository.countByStoreIdAndCustomerId(order.getStoreId(),
+						order.getCustomerId());
+				long graeshoppeCount = orderRepository.countByCustomerId(order.getCustomerId());
+				log.info("Order fetched from db is  " + order);
+				log.info("restaurant total count is " + restaurantCount + " Graeshoppe total count " + graeshoppeCount);
+				Builder orderAvro = com.diviso.graeshoppe.order.avro.Order.newBuilder().setOrderId(order.getOrderId())
+						.setAllergyNote(order.getAllergyNote()).setEventType("CREATE")
+						.setCustomerId(order.getCustomerId()).setStoreId(order.getStoreId())
+						.setPaymentRef(order.getPaymentRef()).setCustomerPhone(phone)
+						.setOrderCountgraeshoppe(graeshoppeCount).setOrderCountRestaurant(restaurantCount)
+						.setGrandTotal(order.getGrandTotal()).setSubTotal(order.getSubTotal())
+						.setEmail(order.getEmail()).setPaymentMode(order.getPaymentMode())
+						.setPaymentRef(order.getPaymentRef()).setTimeZone(order.getTimeZone())
+						.setStatus(Status.newBuilder().setId(order.getStatus().getId())
+								.setName(order.getStatus().getName()).build())
+						.setOrderLines(
+								order.getOrderLines().stream().map(this::toAvroOrderLine).collect(Collectors.toList()));
+				if (order.getPreOrderDate() != null) {
+					orderAvro.setPreOrderDate(order.getPreOrderDate().toEpochMilli());
+				}
+				if (order.getDate() != null) {
+					orderAvro.setDate(order.getDate().toEpochMilli());
 
-					}
+				}
 
-					if (order.getApprovalDetails() == null) {
-						log.info("Approval details not exists");
-						orderAvro.setApprovalDetails(ApprovalDetails.newBuilder()
-								.setExpectedDelivery(order.getDate().plus(Duration.ofMinutes(40)).toEpochMilli())
-								.setAcceptedAt(order.getDate().plus(Duration.ofMinutes(5)).toEpochMilli()).build());
-					} else {
-						log.info("Approval details exists");
-						orderAvro.setApprovalDetails(ApprovalDetails.newBuilder()
-								.setAcceptedAt(order.getApprovalDetails().getAcceptedAt().toEpochMilli())
-								.setExpectedDelivery(order.getApprovalDetails().getExpectedDelivery().toEpochMilli())
-								.setDecision(order.getApprovalDetails().getDecision()).build());
-					}
+				if (order.getApprovalDetails() == null) {
+					log.info("Approval details not exists");
+					orderAvro.setApprovalDetails(ApprovalDetails.newBuilder()
+							.setExpectedDelivery(order.getDate().plus(Duration.ofMinutes(40)).toEpochMilli())
+							.setAcceptedAt(order.getDate().plus(Duration.ofMinutes(5)).toEpochMilli()).build());
+				} else {
+					log.info("Approval details exists");
+					orderAvro.setApprovalDetails(ApprovalDetails.newBuilder()
+							.setAcceptedAt(order.getApprovalDetails().getAcceptedAt().toEpochMilli())
+							.setExpectedDelivery(order.getApprovalDetails().getExpectedDelivery().toEpochMilli())
+							.setDecision(order.getApprovalDetails().getDecision()).build());
+				}
 
-					orderAvro.setDeliveryInfoBuilder(
-							DeliveryInfo.newBuilder().setDeliveryType(order.getDeliveryInfo().getDeliveryType())
-									.setDeliveryNotes(order.getDeliveryInfo().getDeliveryNotes()));
-					if (order.getDeliveryInfo().getDeliveryAddress() != null) {
+				orderAvro.setDeliveryInfoBuilder(
+						DeliveryInfo.newBuilder().setDeliveryType(order.getDeliveryInfo().getDeliveryType())
+								.setDeliveryNotes(order.getDeliveryInfo().getDeliveryNotes()));
+				if (order.getDeliveryInfo().getDeliveryAddress() != null) {
 
-						orderAvro.getDeliveryInfoBuilder()
-								.setDeliveryAddress(Address.newBuilder()
-										.setCustomerId(order.getDeliveryInfo().getDeliveryAddress().getCustomerId())
-										.setPincode(order.getDeliveryInfo().getDeliveryAddress().getPincode())
-										.setHouseNoOrBuildingName(
-												order.getDeliveryInfo().getDeliveryAddress().getHouseNoOrBuildingName())
-										.setRoadNameAreaOrStreet(
-												order.getDeliveryInfo().getDeliveryAddress().getRoadNameAreaOrStreet())
-										.setCity(order.getDeliveryInfo().getDeliveryAddress().getCity())
-										.setState(order.getDeliveryInfo().getDeliveryAddress().getState())
-										.setLandmark(order.getDeliveryInfo().getDeliveryAddress().getLandmark())
-										.setPhone(order.getDeliveryInfo().getDeliveryAddress().getPhone())
-										.setEmail(order.getDeliveryInfo().getDeliveryAddress().getEmail())
-										.setAlternatePhone(
-												order.getDeliveryInfo().getDeliveryAddress().getAlternatePhone())
-										.build());
+					orderAvro.getDeliveryInfoBuilder()
+							.setDeliveryAddress(Address.newBuilder()
+									.setCustomerId(order.getDeliveryInfo().getDeliveryAddress().getCustomerId())
+									.setPincode(order.getDeliveryInfo().getDeliveryAddress().getPincode())
+									.setHouseNoOrBuildingName(
+											order.getDeliveryInfo().getDeliveryAddress().getHouseNoOrBuildingName())
+									.setRoadNameAreaOrStreet(
+											order.getDeliveryInfo().getDeliveryAddress().getRoadNameAreaOrStreet())
+									.setCity(order.getDeliveryInfo().getDeliveryAddress().getCity())
+									.setState(order.getDeliveryInfo().getDeliveryAddress().getState())
+									.setLandmark(order.getDeliveryInfo().getDeliveryAddress().getLandmark())
+									.setPhone(order.getDeliveryInfo().getDeliveryAddress().getPhone())
+									.setEmail(order.getDeliveryInfo().getDeliveryAddress().getEmail())
+									.setAlternatePhone(order.getDeliveryInfo().getDeliveryAddress().getAlternatePhone())
+									.build());
 
-					}
-					List<com.diviso.graeshoppe.order.avro.Offer> offerAvroList = new ArrayList<>();
-					order.getAppliedOffers().forEach(offer -> {
-						com.diviso.graeshoppe.order.avro.Offer offerAvro = com.diviso.graeshoppe.order.avro.Offer
-								.newBuilder().setOfferRef(offer.getOfferRef())
-								.setDiscountAmount(offer.getOrderDiscountAmount()).build();
-						offerAvroList.add(offerAvro);
-						orderAvro.setDiscountAmount(offer.getOrderDiscountAmount()); // needs to change
-					});
-					orderAvro.setOfferLines(offerAvroList);
-					if (order.getDeliveryInfo().getDeliveryCharge() == null) {
-						orderAvro.getDeliveryInfoBuilder().setDeliveryCharge(0.0d);
-					} else {
-						orderAvro.getDeliveryInfoBuilder()
-								.setDeliveryCharge(order.getDeliveryInfo().getDeliveryCharge());
-					}
-					orderAvro.getDeliveryInfoBuilder().build();
-					// orderAvro.setOfferLines(order.getAppliedOffers().stream().map(this::toAvroOffer).collect(Collectors.toList()));
-					com.diviso.graeshoppe.order.avro.Order message = orderAvro.build();
-					try {
-						PublishResult result = kafkaMessagingService.publishOrder(message);
-						log.info("Publish result avro message order is " + result);
-					} catch (ExecutionException e) {
-						log.error("Error sending avro message " + e.getMessage());
-						e.printStackTrace();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-						log.error("Error sending avro message " + e.getMessage());
+				}
+				List<com.diviso.graeshoppe.order.avro.Offer> offerAvroList = new ArrayList<>();
+				order.getAppliedOffers().forEach(offer -> {
+					com.diviso.graeshoppe.order.avro.Offer offerAvro = com.diviso.graeshoppe.order.avro.Offer
+							.newBuilder().setOfferRef(offer.getOfferRef())
+							.setDiscountAmount(offer.getOrderDiscountAmount()).build();
+					offerAvroList.add(offerAvro);
+					orderAvro.setDiscountAmount(offer.getOrderDiscountAmount()); // needs to change
+				});
+				orderAvro.setOfferLines(offerAvroList);
+				if (order.getDeliveryInfo().getDeliveryCharge() == null) {
+					orderAvro.getDeliveryInfoBuilder().setDeliveryCharge(0.0d);
+				} else {
+					orderAvro.getDeliveryInfoBuilder().setDeliveryCharge(order.getDeliveryInfo().getDeliveryCharge());
+				}
+				orderAvro.getDeliveryInfoBuilder().build();
+				// orderAvro.setOfferLines(order.getAppliedOffers().stream().map(this::toAvroOffer).collect(Collectors.toList()));
+				com.diviso.graeshoppe.order.avro.Order message = orderAvro.build();
+				try {
+					PublishResult result = kafkaMessagingService.publishOrder(message);
+					log.info("Publish result avro message order is " + result);
+				} catch (ExecutionException e) {
+					log.error("Error sending avro message " + e.getMessage());
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					log.error("Error sending avro message " + e.getMessage());
 
-					}
-				} 
+				}
 			}
+		}
 	}
 
 	private com.diviso.graeshoppe.order.avro.OrderLine toAvroOrderLine(OrderLine orderline) {
@@ -438,5 +436,15 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 		notificationDTO.setType("Order-Delivered");
 		NotificationDTO result = notificationService.save(notificationDTO);
 		notificationService.publishNotificationToMessageBroker(result);
+		OrderState state = OrderState.newBuilder().setMessage("").setState("delivered").setTargetId(orderId).build();
+		try {
+			kafkaMessagingService.publishOrderState(state);
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

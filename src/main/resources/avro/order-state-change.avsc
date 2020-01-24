@@ -1,0 +1,10 @@
+{
+	"namespace":"com.diviso.graeshoppe.order.avro",
+	"type":"record",
+	"name":"OrderState",
+	"fields":[
+		{"name":"state","type":["null","string"],"default": null},
+		{"name":"message","type":["null","string"],"default": null},
+		{"name":"targetId","type":["null","string"],"default": null}
+		]
+	}
