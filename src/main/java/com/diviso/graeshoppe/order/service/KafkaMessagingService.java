@@ -217,7 +217,7 @@ public class KafkaMessagingService {
 		CompletableFuture.runAsync(() -> {
 			Optional<OrderDTO> orderDTO = orderCommandService.findByOrderID(cancellationRequest.getOrderId());
 			if (orderDTO.isPresent()) {
-				orderDTO.get().setStatusId(8l); // cancellation-requested
+				//orderDTO.get().setStatusId(8l); // cancellation-requested
 				orderDTO.get().setCancellationRef(cancellationRequest.getId());
 				orderCommandService.update(orderDTO.get());
 				log.info("Order is updated after cancellation with ref " + cancellationRequest.getId());
@@ -240,6 +240,6 @@ public class KafkaMessagingService {
 	public void startConsumers() {
 		subscribePayment();
 		subscribeCancellation();
-		subscribeRefundDetails();
+		//subscribeRefundDetails();
 	}
 }
