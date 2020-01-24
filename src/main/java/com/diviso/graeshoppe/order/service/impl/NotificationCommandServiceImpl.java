@@ -70,12 +70,8 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 				.setDate(notification.getDate().toEpochMilli()).setId(notification.getId())
 				.setMessage(notification.getMessage()).setTargetId(notification.getTargetId())
 				.setReceiverId(notification.getReceiverId()).setType(notification.getType())
-				.setImageContentType(notification.getImageContentType()).setTitle(notification.getTitle())
+				.setImageLink("").setTitle(notification.getTitle())
 				.setStatus(notification.getStatus());
-		if (notification.getImage() != null) {
-			messageBuilder.setImage(ByteBuffer.wrap(notification.getImage()));
-		}
-
 		try {
 			PublishResult result = kafkaMessagingService.publishNotification(messageBuilder.build());
 			log.info("Message has been sent to the message broker " + result);

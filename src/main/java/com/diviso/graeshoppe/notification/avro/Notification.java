@@ -13,8 +13,8 @@ import org.apache.avro.message.SchemaStore;
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public class Notification extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = 2621894451755164979L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Notification\",\"namespace\":\"com.diviso.graeshoppe.notification.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"title\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"default\":null},{\"name\":\"message\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"default\":null},{\"name\":\"targetId\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"default\":null},{\"name\":\"type\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"default\":null},{\"name\":\"image\",\"type\":\"bytes\",\"default\":\"ÿ\"},{\"name\":\"imageContentType\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"default\":null},{\"name\":\"date\",\"type\":\"long\",\"logicalType\":\"date\"},{\"name\":\"receiverId\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"default\":null},{\"name\":\"status\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"default\":null}]}");
+  private static final long serialVersionUID = -2585121928568966787L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Notification\",\"namespace\":\"com.diviso.graeshoppe.notification.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"title\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"default\":null},{\"name\":\"message\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"default\":null},{\"name\":\"targetId\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"default\":null},{\"name\":\"type\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"default\":null},{\"name\":\"imageLink\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"default\":null},{\"name\":\"date\",\"type\":\"long\",\"logicalType\":\"date\"},{\"name\":\"receiverId\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"default\":null},{\"name\":\"status\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"default\":null}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -56,8 +56,7 @@ public class Notification extends org.apache.avro.specific.SpecificRecordBase im
   @Deprecated public java.lang.String message;
   @Deprecated public java.lang.String targetId;
   @Deprecated public java.lang.String type;
-  @Deprecated public java.nio.ByteBuffer image;
-  @Deprecated public java.lang.String imageContentType;
+  @Deprecated public java.lang.String imageLink;
   @Deprecated public long date;
   @Deprecated public java.lang.String receiverId;
   @Deprecated public java.lang.String status;
@@ -76,48 +75,42 @@ public class Notification extends org.apache.avro.specific.SpecificRecordBase im
    * @param message The new value for message
    * @param targetId The new value for targetId
    * @param type The new value for type
-   * @param image The new value for image
-   * @param imageContentType The new value for imageContentType
+   * @param imageLink The new value for imageLink
    * @param date The new value for date
    * @param receiverId The new value for receiverId
    * @param status The new value for status
    */
-  public Notification(java.lang.Long id, java.lang.String title, java.lang.String message, java.lang.String targetId, java.lang.String type, java.nio.ByteBuffer image, java.lang.String imageContentType, java.lang.Long date, java.lang.String receiverId, java.lang.String status) {
+  public Notification(java.lang.Long id, java.lang.String title, java.lang.String message, java.lang.String targetId, java.lang.String type, java.lang.String imageLink, java.lang.Long date, java.lang.String receiverId, java.lang.String status) {
     this.id = id;
     this.title = title;
     this.message = message;
     this.targetId = targetId;
     this.type = type;
-    this.image = image;
-    this.imageContentType = imageContentType;
+    this.imageLink = imageLink;
     this.date = date;
     this.receiverId = receiverId;
     this.status = status;
   }
 
-  @Override
-public org.apache.avro.Schema getSchema() { return SCHEMA$; }
+  public org.apache.avro.Schema getSchema() { return SCHEMA$; }
   // Used by DatumWriter.  Applications should not call.
-  @Override
-public java.lang.Object get(int field$) {
+  public java.lang.Object get(int field$) {
     switch (field$) {
     case 0: return id;
     case 1: return title;
     case 2: return message;
     case 3: return targetId;
     case 4: return type;
-    case 5: return image;
-    case 6: return imageContentType;
-    case 7: return date;
-    case 8: return receiverId;
-    case 9: return status;
+    case 5: return imageLink;
+    case 6: return date;
+    case 7: return receiverId;
+    case 8: return status;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
 
   // Used by DatumReader.  Applications should not call.
-  @Override
-@SuppressWarnings(value="unchecked")
+  @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
     case 0: id = (java.lang.Long)value$; break;
@@ -125,11 +118,10 @@ public java.lang.Object get(int field$) {
     case 2: message = (java.lang.String)value$; break;
     case 3: targetId = (java.lang.String)value$; break;
     case 4: type = (java.lang.String)value$; break;
-    case 5: image = (java.nio.ByteBuffer)value$; break;
-    case 6: imageContentType = (java.lang.String)value$; break;
-    case 7: date = (java.lang.Long)value$; break;
-    case 8: receiverId = (java.lang.String)value$; break;
-    case 9: status = (java.lang.String)value$; break;
+    case 5: imageLink = (java.lang.String)value$; break;
+    case 6: date = (java.lang.Long)value$; break;
+    case 7: receiverId = (java.lang.String)value$; break;
+    case 8: status = (java.lang.String)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -215,35 +207,19 @@ public java.lang.Object get(int field$) {
   }
 
   /**
-   * Gets the value of the 'image' field.
-   * @return The value of the 'image' field.
+   * Gets the value of the 'imageLink' field.
+   * @return The value of the 'imageLink' field.
    */
-  public java.nio.ByteBuffer getImage() {
-    return image;
+  public java.lang.String getImageLink() {
+    return imageLink;
   }
 
   /**
-   * Sets the value of the 'image' field.
+   * Sets the value of the 'imageLink' field.
    * @param value the value to set.
    */
-  public void setImage(java.nio.ByteBuffer value) {
-    this.image = value;
-  }
-
-  /**
-   * Gets the value of the 'imageContentType' field.
-   * @return The value of the 'imageContentType' field.
-   */
-  public java.lang.String getImageContentType() {
-    return imageContentType;
-  }
-
-  /**
-   * Sets the value of the 'imageContentType' field.
-   * @param value the value to set.
-   */
-  public void setImageContentType(java.lang.String value) {
-    this.imageContentType = value;
+  public void setImageLink(java.lang.String value) {
+    this.imageLink = value;
   }
 
   /**
@@ -331,8 +307,7 @@ public java.lang.Object get(int field$) {
     private java.lang.String message;
     private java.lang.String targetId;
     private java.lang.String type;
-    private java.nio.ByteBuffer image;
-    private java.lang.String imageContentType;
+    private java.lang.String imageLink;
     private long date;
     private java.lang.String receiverId;
     private java.lang.String status;
@@ -368,25 +343,21 @@ public java.lang.Object get(int field$) {
         this.type = data().deepCopy(fields()[4].schema(), other.type);
         fieldSetFlags()[4] = true;
       }
-      if (isValidValue(fields()[5], other.image)) {
-        this.image = data().deepCopy(fields()[5].schema(), other.image);
+      if (isValidValue(fields()[5], other.imageLink)) {
+        this.imageLink = data().deepCopy(fields()[5].schema(), other.imageLink);
         fieldSetFlags()[5] = true;
       }
-      if (isValidValue(fields()[6], other.imageContentType)) {
-        this.imageContentType = data().deepCopy(fields()[6].schema(), other.imageContentType);
+      if (isValidValue(fields()[6], other.date)) {
+        this.date = data().deepCopy(fields()[6].schema(), other.date);
         fieldSetFlags()[6] = true;
       }
-      if (isValidValue(fields()[7], other.date)) {
-        this.date = data().deepCopy(fields()[7].schema(), other.date);
+      if (isValidValue(fields()[7], other.receiverId)) {
+        this.receiverId = data().deepCopy(fields()[7].schema(), other.receiverId);
         fieldSetFlags()[7] = true;
       }
-      if (isValidValue(fields()[8], other.receiverId)) {
-        this.receiverId = data().deepCopy(fields()[8].schema(), other.receiverId);
+      if (isValidValue(fields()[8], other.status)) {
+        this.status = data().deepCopy(fields()[8].schema(), other.status);
         fieldSetFlags()[8] = true;
-      }
-      if (isValidValue(fields()[9], other.status)) {
-        this.status = data().deepCopy(fields()[9].schema(), other.status);
-        fieldSetFlags()[9] = true;
       }
     }
 
@@ -416,25 +387,21 @@ public java.lang.Object get(int field$) {
         this.type = data().deepCopy(fields()[4].schema(), other.type);
         fieldSetFlags()[4] = true;
       }
-      if (isValidValue(fields()[5], other.image)) {
-        this.image = data().deepCopy(fields()[5].schema(), other.image);
+      if (isValidValue(fields()[5], other.imageLink)) {
+        this.imageLink = data().deepCopy(fields()[5].schema(), other.imageLink);
         fieldSetFlags()[5] = true;
       }
-      if (isValidValue(fields()[6], other.imageContentType)) {
-        this.imageContentType = data().deepCopy(fields()[6].schema(), other.imageContentType);
+      if (isValidValue(fields()[6], other.date)) {
+        this.date = data().deepCopy(fields()[6].schema(), other.date);
         fieldSetFlags()[6] = true;
       }
-      if (isValidValue(fields()[7], other.date)) {
-        this.date = data().deepCopy(fields()[7].schema(), other.date);
+      if (isValidValue(fields()[7], other.receiverId)) {
+        this.receiverId = data().deepCopy(fields()[7].schema(), other.receiverId);
         fieldSetFlags()[7] = true;
       }
-      if (isValidValue(fields()[8], other.receiverId)) {
-        this.receiverId = data().deepCopy(fields()[8].schema(), other.receiverId);
+      if (isValidValue(fields()[8], other.status)) {
+        this.status = data().deepCopy(fields()[8].schema(), other.status);
         fieldSetFlags()[8] = true;
-      }
-      if (isValidValue(fields()[9], other.status)) {
-        this.status = data().deepCopy(fields()[9].schema(), other.status);
-        fieldSetFlags()[9] = true;
       }
     }
 
@@ -633,80 +600,41 @@ public java.lang.Object get(int field$) {
     }
 
     /**
-      * Gets the value of the 'image' field.
+      * Gets the value of the 'imageLink' field.
       * @return The value.
       */
-    public java.nio.ByteBuffer getImage() {
-      return image;
+    public java.lang.String getImageLink() {
+      return imageLink;
     }
 
     /**
-      * Sets the value of the 'image' field.
-      * @param value The value of 'image'.
+      * Sets the value of the 'imageLink' field.
+      * @param value The value of 'imageLink'.
       * @return This builder.
       */
-    public com.diviso.graeshoppe.notification.avro.Notification.Builder setImage(java.nio.ByteBuffer value) {
+    public com.diviso.graeshoppe.notification.avro.Notification.Builder setImageLink(java.lang.String value) {
       validate(fields()[5], value);
-      this.image = value;
+      this.imageLink = value;
       fieldSetFlags()[5] = true;
       return this;
     }
 
     /**
-      * Checks whether the 'image' field has been set.
-      * @return True if the 'image' field has been set, false otherwise.
+      * Checks whether the 'imageLink' field has been set.
+      * @return True if the 'imageLink' field has been set, false otherwise.
       */
-    public boolean hasImage() {
+    public boolean hasImageLink() {
       return fieldSetFlags()[5];
     }
 
 
     /**
-      * Clears the value of the 'image' field.
+      * Clears the value of the 'imageLink' field.
       * @return This builder.
       */
-    public com.diviso.graeshoppe.notification.avro.Notification.Builder clearImage() {
-      image = null;
+    public com.diviso.graeshoppe.notification.avro.Notification.Builder clearImageLink() {
+      imageLink = null;
       fieldSetFlags()[5] = false;
-      return this;
-    }
-
-    /**
-      * Gets the value of the 'imageContentType' field.
-      * @return The value.
-      */
-    public java.lang.String getImageContentType() {
-      return imageContentType;
-    }
-
-    /**
-      * Sets the value of the 'imageContentType' field.
-      * @param value The value of 'imageContentType'.
-      * @return This builder.
-      */
-    public com.diviso.graeshoppe.notification.avro.Notification.Builder setImageContentType(java.lang.String value) {
-      validate(fields()[6], value);
-      this.imageContentType = value;
-      fieldSetFlags()[6] = true;
-      return this;
-    }
-
-    /**
-      * Checks whether the 'imageContentType' field has been set.
-      * @return True if the 'imageContentType' field has been set, false otherwise.
-      */
-    public boolean hasImageContentType() {
-      return fieldSetFlags()[6];
-    }
-
-
-    /**
-      * Clears the value of the 'imageContentType' field.
-      * @return This builder.
-      */
-    public com.diviso.graeshoppe.notification.avro.Notification.Builder clearImageContentType() {
-      imageContentType = null;
-      fieldSetFlags()[6] = false;
       return this;
     }
 
@@ -724,9 +652,9 @@ public java.lang.Object get(int field$) {
       * @return This builder.
       */
     public com.diviso.graeshoppe.notification.avro.Notification.Builder setDate(long value) {
-      validate(fields()[7], value);
+      validate(fields()[6], value);
       this.date = value;
-      fieldSetFlags()[7] = true;
+      fieldSetFlags()[6] = true;
       return this;
     }
 
@@ -735,7 +663,7 @@ public java.lang.Object get(int field$) {
       * @return True if the 'date' field has been set, false otherwise.
       */
     public boolean hasDate() {
-      return fieldSetFlags()[7];
+      return fieldSetFlags()[6];
     }
 
 
@@ -744,7 +672,7 @@ public java.lang.Object get(int field$) {
       * @return This builder.
       */
     public com.diviso.graeshoppe.notification.avro.Notification.Builder clearDate() {
-      fieldSetFlags()[7] = false;
+      fieldSetFlags()[6] = false;
       return this;
     }
 
@@ -762,9 +690,9 @@ public java.lang.Object get(int field$) {
       * @return This builder.
       */
     public com.diviso.graeshoppe.notification.avro.Notification.Builder setReceiverId(java.lang.String value) {
-      validate(fields()[8], value);
+      validate(fields()[7], value);
       this.receiverId = value;
-      fieldSetFlags()[8] = true;
+      fieldSetFlags()[7] = true;
       return this;
     }
 
@@ -773,7 +701,7 @@ public java.lang.Object get(int field$) {
       * @return True if the 'receiverId' field has been set, false otherwise.
       */
     public boolean hasReceiverId() {
-      return fieldSetFlags()[8];
+      return fieldSetFlags()[7];
     }
 
 
@@ -783,7 +711,7 @@ public java.lang.Object get(int field$) {
       */
     public com.diviso.graeshoppe.notification.avro.Notification.Builder clearReceiverId() {
       receiverId = null;
-      fieldSetFlags()[8] = false;
+      fieldSetFlags()[7] = false;
       return this;
     }
 
@@ -801,9 +729,9 @@ public java.lang.Object get(int field$) {
       * @return This builder.
       */
     public com.diviso.graeshoppe.notification.avro.Notification.Builder setStatus(java.lang.String value) {
-      validate(fields()[9], value);
+      validate(fields()[8], value);
       this.status = value;
-      fieldSetFlags()[9] = true;
+      fieldSetFlags()[8] = true;
       return this;
     }
 
@@ -812,7 +740,7 @@ public java.lang.Object get(int field$) {
       * @return True if the 'status' field has been set, false otherwise.
       */
     public boolean hasStatus() {
-      return fieldSetFlags()[9];
+      return fieldSetFlags()[8];
     }
 
 
@@ -822,7 +750,7 @@ public java.lang.Object get(int field$) {
       */
     public com.diviso.graeshoppe.notification.avro.Notification.Builder clearStatus() {
       status = null;
-      fieldSetFlags()[9] = false;
+      fieldSetFlags()[8] = false;
       return this;
     }
 
@@ -836,11 +764,10 @@ public java.lang.Object get(int field$) {
         record.message = fieldSetFlags()[2] ? this.message : (java.lang.String) defaultValue(fields()[2]);
         record.targetId = fieldSetFlags()[3] ? this.targetId : (java.lang.String) defaultValue(fields()[3]);
         record.type = fieldSetFlags()[4] ? this.type : (java.lang.String) defaultValue(fields()[4]);
-        record.image = fieldSetFlags()[5] ? this.image : (java.nio.ByteBuffer) defaultValue(fields()[5]);
-        record.imageContentType = fieldSetFlags()[6] ? this.imageContentType : (java.lang.String) defaultValue(fields()[6]);
-        record.date = fieldSetFlags()[7] ? this.date : (java.lang.Long) defaultValue(fields()[7]);
-        record.receiverId = fieldSetFlags()[8] ? this.receiverId : (java.lang.String) defaultValue(fields()[8]);
-        record.status = fieldSetFlags()[9] ? this.status : (java.lang.String) defaultValue(fields()[9]);
+        record.imageLink = fieldSetFlags()[5] ? this.imageLink : (java.lang.String) defaultValue(fields()[5]);
+        record.date = fieldSetFlags()[6] ? this.date : (java.lang.Long) defaultValue(fields()[6]);
+        record.receiverId = fieldSetFlags()[7] ? this.receiverId : (java.lang.String) defaultValue(fields()[7]);
+        record.status = fieldSetFlags()[8] ? this.status : (java.lang.String) defaultValue(fields()[8]);
         return record;
       } catch (java.lang.Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
@@ -850,7 +777,7 @@ public java.lang.Object get(int field$) {
 
   @SuppressWarnings("unchecked")
   private static final org.apache.avro.io.DatumWriter<Notification>
-    WRITER$ = MODEL$.createDatumWriter(SCHEMA$);
+    WRITER$ = (org.apache.avro.io.DatumWriter<Notification>)MODEL$.createDatumWriter(SCHEMA$);
 
   @Override public void writeExternal(java.io.ObjectOutput out)
     throws java.io.IOException {
@@ -859,7 +786,7 @@ public java.lang.Object get(int field$) {
 
   @SuppressWarnings("unchecked")
   private static final org.apache.avro.io.DatumReader<Notification>
-    READER$ = MODEL$.createDatumReader(SCHEMA$);
+    READER$ = (org.apache.avro.io.DatumReader<Notification>)MODEL$.createDatumReader(SCHEMA$);
 
   @Override public void readExternal(java.io.ObjectInput in)
     throws java.io.IOException {
