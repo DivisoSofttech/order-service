@@ -52,8 +52,18 @@ public class OfferServiceImpl implements OfferService {
         offer = offerRepository.save(offer);
         OfferDTO result = offerMapper.toDto(offer);
         offerSearchRepository.save(offer);
+        return updateToEs(result);
+    }
+    
+    private OfferDTO updateToEs(OfferDTO offerDTO) {
+        log.debug("Request to save Offer : {}", offerDTO);
+        Offer offer = offerMapper.toEntity(offerDTO);
+        offer = offerRepository.save(offer);
+        OfferDTO result = offerMapper.toDto(offer);
+        offerSearchRepository.save(offer);
         return result;
     }
+    
 
     /**
      * Get all the offers.

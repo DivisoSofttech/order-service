@@ -52,6 +52,15 @@ public class AuxilaryOrderLineServiceImpl implements AuxilaryOrderLineService {
         auxilaryOrderLine = auxilaryOrderLineRepository.save(auxilaryOrderLine);
         AuxilaryOrderLineDTO result = auxilaryOrderLineMapper.toDto(auxilaryOrderLine);
         auxilaryOrderLineSearchRepository.save(auxilaryOrderLine);
+        return updateToEs(result);
+    }
+    
+    private AuxilaryOrderLineDTO updateToEs(AuxilaryOrderLineDTO auxilaryOrderLineDTO) {
+        log.debug("Request to save AuxilaryOrderLine : {}", auxilaryOrderLineDTO);
+        AuxilaryOrderLine auxilaryOrderLine = auxilaryOrderLineMapper.toEntity(auxilaryOrderLineDTO);
+        auxilaryOrderLine = auxilaryOrderLineRepository.save(auxilaryOrderLine);
+        AuxilaryOrderLineDTO result = auxilaryOrderLineMapper.toDto(auxilaryOrderLine);
+        auxilaryOrderLineSearchRepository.save(auxilaryOrderLine);
         return result;
     }
 
