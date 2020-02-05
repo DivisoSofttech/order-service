@@ -115,7 +115,9 @@
 			   {"name":"status","type":["null","com.diviso.graeshoppe.order.avro.Status"]},
 			   {"name":"orderLines","type":{"type":"array","items":"com.diviso.graeshoppe.order.avro.OrderLine"}},
 			   {"name":"offerLines","type":{"type":"array","items":"com.diviso.graeshoppe.order.avro.Offer"}},
-			   {"name":"eventType","type":["null","string"]}
+			   {"name":"eventType","type":["null","string"]},
+			   {"name":"nextTaskId","type":["null","string"]}
+			   
 			   
 			]
 	}

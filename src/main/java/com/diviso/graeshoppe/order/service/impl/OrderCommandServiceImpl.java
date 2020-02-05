@@ -315,6 +315,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 						.setGrandTotal(order.getGrandTotal()).setSubTotal(order.getSubTotal())
 						.setEmail(order.getEmail()).setPaymentMode(order.getPaymentMode())
 						.setPaymentRef(order.getPaymentRef()).setTimeZone(order.getTimeZone())
+						.setNextTaskId(order.getAcceptOrderId())
 						.setStatus(Status.newBuilder().setId(order.getStatus().getId())
 								.setName(order.getStatus().getName()).build())
 						.setOrderLines(
