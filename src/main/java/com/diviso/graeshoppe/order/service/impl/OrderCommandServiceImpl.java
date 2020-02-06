@@ -359,6 +359,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 									.setLandmark(order.getDeliveryInfo().getDeliveryAddress().getLandmark())
 									.setPhone(order.getDeliveryInfo().getDeliveryAddress().getPhone())
 									.setEmail(order.getDeliveryInfo().getDeliveryAddress().getEmail())
+									.setName(order.getDeliveryInfo().getDeliveryAddress().getName())
 									.setAlternatePhone(order.getDeliveryInfo().getDeliveryAddress().getAlternatePhone())
 									.build());
 
