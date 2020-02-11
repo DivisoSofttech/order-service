@@ -182,8 +182,8 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		deliveryTime.setId("deliveryTime");
 		deliveryTime.setName("deliveryTime");
 		deliveryTime.setType("String");
-		deliveryTime.setValue(expectedDeliveryTime);
-		log.info("Delivery Time is "+expectedDeliveryTime);
+		deliveryTime.setValue(expectedDeliveryTime+"/ASAP");
+		log.info("Delivery Time is "+expectedDeliveryTime+"/ASAP");
 		properties.add(deliveryTime);
 
 		formRequest.setProperties(properties);
