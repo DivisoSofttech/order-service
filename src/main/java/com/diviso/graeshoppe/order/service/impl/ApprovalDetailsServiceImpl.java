@@ -101,7 +101,7 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		String stringDate = null;
 		if (approvalDetailsDTO.getExpectedDelivery() != null) {
 			log.info("Expected delivery will be deliverytime");
-			log.info(" converted with zoneid is "+approvalDetailsDTO.getExpectedDelivery().atZone(ZoneId.of(orderDTO.getTimeZone())));
+			log.info(" converted with zoneid is hour"+approvalDetailsDTO.getExpectedDelivery().atZone(ZoneId.of(orderDTO.getTimeZone())).getHour()+" Minutes "+approvalDetailsDTO.getExpectedDelivery().atZone(ZoneId.of(orderDTO.getTimeZone())).getMinute());
 			stringDate = Date.from(approvalDetailsDTO.getExpectedDelivery()).toString();
 		} else if(orderDTO.getPreOrderDate()!=null){
 			log.info("Preorder date will be delivery time");
