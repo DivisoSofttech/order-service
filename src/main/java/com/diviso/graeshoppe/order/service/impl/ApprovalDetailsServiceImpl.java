@@ -30,9 +30,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -98,18 +101,28 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		ApprovalDetailsDTO result = approvalDetailsMapper.toDto(approvalDetails);
 		approvalDetailsSearchRepository.save(approvalDetails);
 		OrderDTO orderDTO = orderService.findByOrderID(approvalDetailsDTO.getOrderId()).get();
+		ZonedDateTime deliveryTime =null;
 		String stringDate = null;
 		if (approvalDetailsDTO.getExpectedDelivery() != null) {
 			log.info("Expected delivery will be deliverytime");
-			log.info(" converted with zoneid is hour"+approvalDetailsDTO.getExpectedDelivery().atZone(ZoneId.of(orderDTO.getTimeZone())).getHour()+" Minutes "+approvalDetailsDTO.getExpectedDelivery().atZone(ZoneId.of(orderDTO.getTimeZone())).getMinute());
-			stringDate = Date.from(approvalDetailsDTO.getExpectedDelivery()).toString();
+			deliveryTime = approvalDetailsDTO.getExpectedDelivery().atZone(ZoneId.of(orderDTO.getTimeZone()));
+			int hour=deliveryTime.getHour();
+			int minutes =deliveryTime.getMinute();
+			stringDate = hour+":"+minutes;
 		} else if(orderDTO.getPreOrderDate()!=null){
 			log.info("Preorder date will be delivery time");
-			stringDate = Date.from(orderDTO.getPreOrderDate()).toString();
+			deliveryTime = orderDTO.getPreOrderDate().atZone(ZoneId.of(orderDTO.getTimeZone()));
+//			int hour=deliveryTime.getHour();
+//			int minutes =deliveryTime.getMinute();
+			DateFormat formatter=new SimpleDateFormat("hh:mm a");
+			stringDate = formatter.format(new Date(deliveryTime.toEpochSecond()));
+			
 		}else {
 			log.info("Expected DeliveryTime will be the date of order + 40 minutes");
-			stringDate = Date.from(orderDTO.getDate().plus(Duration.ofMinutes(40))).toString();
-
+			deliveryTime = orderDTO.getDate().plus(Duration.ofMinutes(40)).atZone(ZoneId.of(orderDTO.getTimeZone()));
+			int hour=deliveryTime.getHour();
+			int minutes =deliveryTime.getMinute();
+			stringDate = hour+":"+minutes;
 		}
 		CommandResource result1 = acceptOrder(approvalDetailsDTO, taskId,stringDate,orderDTO.getProcessId());
 		result1.setSelfId(result.getId());
@@ -164,14 +177,13 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		properties.add(decision);
 
 		
-		String date = expectedDeliveryTime.substring(4, 10);
-		String time = expectedDeliveryTime.substring(11, 16);
+
 		RestFormProperty deliveryTime = new RestFormProperty();
 		deliveryTime.setId("deliveryTime");
 		deliveryTime.setName("deliveryTime");
 		deliveryTime.setType("String");
-		deliveryTime.setValue(date + " " + time);
-		log.info("Delivery Time is "+date+" time is "+time);
+		deliveryTime.setValue(expectedDeliveryTime);
+		log.info("Delivery Time is "+expectedDeliveryTime);
 		properties.add(deliveryTime);
 
 		formRequest.setProperties(properties);
