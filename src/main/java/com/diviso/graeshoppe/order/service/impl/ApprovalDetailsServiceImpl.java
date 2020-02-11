@@ -36,6 +36,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -106,19 +107,16 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		if (approvalDetailsDTO.getExpectedDelivery() != null) {
 			log.info("Expected delivery will be deliverytime");
 			deliveryTime = approvalDetailsDTO.getExpectedDelivery().atZone(ZoneId.of(orderDTO.getTimeZone()));
-			DateFormat formatter=new SimpleDateFormat("hh:mm a");
-			stringDate = formatter.format(new Date(deliveryTime.toEpochSecond()));
+			stringDate = DateTimeFormatter.ofPattern("hh:mm a").format(deliveryTime);
 		} else if(orderDTO.getPreOrderDate()!=null){
 			log.info("Preorder date will be delivery time");
 			deliveryTime = orderDTO.getPreOrderDate().atZone(ZoneId.of(orderDTO.getTimeZone()));
-			DateFormat formatter=new SimpleDateFormat("hh:mm a");
-			stringDate = formatter.format(new Date(deliveryTime.toEpochSecond()));
+			stringDate = DateTimeFormatter.ofPattern("hh:mm a").format(deliveryTime);
 			
 		}else {
 			log.info("Expected DeliveryTime will be the date of order + 40 minutes");
-			deliveryTime = orderDTO.getDate().plus(Duration.ofMinutes(40)).atZone(ZoneId.of(orderDTO.getTimeZone()));
-			DateFormat formatter=new SimpleDateFormat("hh:mm a");
-			stringDate = formatter.format(new Date(deliveryTime.toEpochSecond()));
+			deliveryTime = orderDTO.getDate().plus(Duration.ofMinutes(40)).atZone(ZoneId.of(orderDTO.getTimeZone()));			
+			stringDate = DateTimeFormatter.ofPattern("hh:mm a").format(deliveryTime);
 			
 		}
 		CommandResource result1 = acceptOrder(approvalDetailsDTO, taskId,stringDate,orderDTO.getProcessId());
