@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -100,6 +101,7 @@ public class ApprovalDetailsServiceImpl implements ApprovalDetailsService {
 		String stringDate = null;
 		if (approvalDetailsDTO.getExpectedDelivery() != null) {
 			log.info("Expected delivery will be deliverytime");
+			log.info(" converted with zoneid is "+approvalDetailsDTO.getExpectedDelivery().atZone(ZoneId.of(orderDTO.getTimeZone())));
 			stringDate = Date.from(approvalDetailsDTO.getExpectedDelivery()).toString();
 		} else if(orderDTO.getPreOrderDate()!=null){
 			log.info("Preorder date will be delivery time");

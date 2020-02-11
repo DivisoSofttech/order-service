@@ -66,7 +66,7 @@ public class KafkaMessagingService {
 
 	public KafkaMessagingService(OrderQueryService orderQueryService, KafkaProperties kafkaProperties) {
 		this.kafkaProperties = kafkaProperties;
-		this.orderQueryService = orderQueryService;
+		this.orderQueryService = orderQueryService;   
 		this.orderProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
 		this.notificatonProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
 		this.approvalDetailsProducer = new KafkaProducer<>(kafkaProperties.getProducerProps());
