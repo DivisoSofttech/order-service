@@ -427,7 +427,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 		if (order.isPresent()) {
 			order.get().setStatusId(5l);
 		}
-		update(order.get());
+		update(order.get()); 
 		NotificationDTO notificationDTO = new NotificationDTO();
 		notificationDTO.setTitle("Order Delivered");
 		notificationDTO.setMessage("Hi, Your order has been delivered successfuly!");
@@ -448,5 +448,23 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void markAsOutForDelivered(String orderId) {
+		Optional<OrderDTO> order = findByOrderID(orderId);
+		if (order.isPresent()) {
+			order.get().setStatusId(10l);
+		}
+		update(order.get()); 
+		NotificationDTO notificationDTO = new NotificationDTO();
+		notificationDTO.setTitle("Order Out For Delivered");
+		notificationDTO.setMessage("Hi, Your order is out for delivery!");
+		notificationDTO.setReceiverId(order.get().getCustomerId());
+		notificationDTO.setStatus("unread");
+		notificationDTO.setDate(Instant.now());
+		notificationDTO.setTargetId(order.get().getOrderId());
+		notificationDTO.setType("Order-Out-For-Delivered");
+		NotificationDTO result = notificationService.save(notificationDTO);
 	}
 }

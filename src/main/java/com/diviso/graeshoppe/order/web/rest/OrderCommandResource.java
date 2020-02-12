@@ -161,4 +161,9 @@ public class OrderCommandResource {
    public void markOrderAsDelivered(@PathVariable String orderId) {
 	   orderService.markOrderAsDelivered(orderId);
    }
+   
+   @PostMapping("/markAsOutForDelivered/{orderId}")
+   public void markAsOutForDelivered(@PathVariable String orderId) {
+	   orderService.markAsOutForDelivered(orderId);
+   }
 }

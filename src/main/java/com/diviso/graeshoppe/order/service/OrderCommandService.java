@@ -60,5 +60,6 @@ public interface OrderCommandService {
 	
 	Optional<OrderDTO> findByOrderID(String orderId);
 	void markOrderAsDelivered(String orderId);
+	void markAsOutForDelivered(String orderId);
 	
 }
