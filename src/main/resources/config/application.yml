@@ -239,8 +239,8 @@ topic:
    orderstate:
      destination: orderstatechange 
 bpmn:
-   url: http://dev.servers.divisosofttech.com/activiti-rest/service
-   processId: process:23:112634 #process:22:112468 #process:21:36433 #process:1:43 #process:4:78797 #process:2:42632 #process:1:10004
+   url: http://ec2-52-15-174-35.us-east-2.compute.amazonaws.com:8080/activiti-rest/service
+   processId: process:1:47 #process:22:112468 #process:21:36433 #process:1:43 #process:4:78797 #process:2:42632 #process:1:10004
    security:
       basicAuth:
          username: kermit
